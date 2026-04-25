@@ -1,0 +1,14 @@
+# Build artifacts
+dist/
+build/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# User data
+prompts.json
+
+# IDE / tools
+.claude/
