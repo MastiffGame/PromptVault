@@ -15,7 +15,7 @@ else:
     _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DATA_FILE = os.path.join(_APP_DIR, "prompts.json")
-CATEGORIES = ["Clothing", "Hairstyle", "Environment", "Appearance", "Position"]
+CATEGORIES = ["Clothing", "Hairstyle", "Environment", "Appearance", "Position", "Character"]
 
 # ─── Farben ───────────────────────────────────────────────────────────────────
 BG      = "#06060f"
