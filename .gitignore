@@ -9,6 +9,7 @@ __pycache__/
 
 # User data
 prompts.json
+prompts_backup.json
 
 # IDE / tools
 .claude/

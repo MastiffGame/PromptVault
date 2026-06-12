@@ -2,6 +2,8 @@ import customtkinter as ctk
 import tkinter as tk
 import json
 import os
+import re
+import shutil
 import sys
 import random
 from tkinter import messagebox
@@ -15,7 +17,8 @@ else:
     _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DATA_FILE = os.path.join(_APP_DIR, "prompts.json")
-CATEGORIES = ["Clothing", "Hairstyle", "Environment", "Appearance", "Position", "Character"]
+BACKUP_FILE = os.path.join(_APP_DIR, "prompts_backup.json")
+DEFAULT_CATEGORIES = ["Clothing", "Hairstyle", "Environment", "Appearance", "Position", "Character"]
 
 # ─── Farben ───────────────────────────────────────────────────────────────────
 BG      = "#06060f"
@@ -43,27 +46,47 @@ TXT3    = "#222840"
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        # Fehlende Standardkategorien ergänzen
-        changed = False
-        for cat in CATEGORIES:
-            if cat not in data:
-                data[cat] = []
-                changed = True
-        if changed:
-            save_data(data)
-        return data
-    data = {cat: [] for cat in CATEGORIES}
+            return json.load(f)
+    data = {cat: [] for cat in DEFAULT_CATEGORIES}
     save_data(data)
     return data
 
 
 def save_data(data):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
+    # Sicherheitskopie der letzten Version, dann atomar schreiben
+    if os.path.exists(DATA_FILE):
+        try:
+            shutil.copy2(DATA_FILE, BACKUP_FILE)
+        except OSError:
+            pass
+    tmp = DATA_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, DATA_FILE)
+
+
+def split_batch(text):
+    """Zerlegt nummerierten Text ("1: foo  2. bar  3) baz") in einzelne Prompts."""
+    marker = r"(?:^|[\s,;])\s*\d{1,3}\s*[.:)]\s+"
+    if re.search(marker, "\n" + text):
+        parts = re.split(marker, "\n" + text)
+        prompts = [p.strip().strip(",;").strip() for p in parts]
+        return [p for p in prompts if p]
+    # Keine Nummerierung gefunden: jede nicht-leere Zeile = ein Prompt
+    return [line.strip() for line in text.splitlines() if line.strip()]
 
 
 # ─── Button-Helfer ────────────────────────────────────────────────────────────
+
+# CTkFont-Objekte sind teuer — einmal erstellen und wiederverwenden
+_FONT_CACHE = {}
+
+def cfont(size, weight=None, family=None):
+    key = (size, weight, family)
+    if key not in _FONT_CACHE:
+        _FONT_CACHE[key] = ctk.CTkFont(size=size, weight=weight, family=family)
+    return _FONT_CACHE[key]
+
 
 def ghost_btn(parent, text, cmd, *, color=TXT2, hover=SURF3,
               width=90, height=28, font_size=11, **kw):
@@ -72,7 +95,7 @@ def ghost_btn(parent, text, cmd, *, color=TXT2, hover=SURF3,
         fg_color="transparent", hover_color=hover,
         border_width=1, border_color=BORD_H,
         text_color=color, corner_radius=8,
-        font=ctk.CTkFont(size=font_size),
+        font=cfont(font_size),
         width=width, height=height, **kw)
 
 
@@ -83,25 +106,26 @@ def neon_btn(parent, text, cmd, *, color=CYAN, bg=CYAN_DIM, hover=CYAN_MID,
         fg_color=bg, hover_color=hover,
         border_width=1, border_color=color,
         text_color=color, corner_radius=10,
-        font=ctk.CTkFont(size=font_size, weight="bold"),
+        font=cfont(font_size, "bold"),
         width=width, height=height, state=state, **kw)
 
 
-def danger_btn(parent, text, cmd, *, width=80, height=26, font_size=11, **kw):
-    return ctk.CTkButton(
-        parent, text=text, command=cmd,
-        fg_color=RED_DIM, hover_color=RED_MID,
-        border_width=1, border_color=RED,
-        text_color=RED, corner_radius=8,
-        font=ctk.CTkFont(size=font_size),
-        width=width, height=height, **kw)
+def flat_btn(parent, text, cmd, *, fg=TXT2, bg=SURF2, hover=SURF3, hover_fg=None):
+    """Leichter tk-Button für Listenkarten — viel schneller als CTkButton."""
+    lbl = tk.Label(parent, text=text, fg=fg, bg=bg,
+                   font=("Segoe UI", 9), padx=10, pady=2, cursor="hand2",
+                   highlightbackground=BORD_H, highlightthickness=1)
+    lbl.bind("<Button-1>", lambda _: cmd())
+    lbl.bind("<Enter>", lambda _: lbl.configure(bg=hover, fg=hover_fg or fg))
+    lbl.bind("<Leave>", lambda _: lbl.configure(bg=bg, fg=fg))
+    return lbl
 
 
 # ─── Kategorie-Zeile ──────────────────────────────────────────────────────────
 
 class CategoryRow(tk.Frame):
     """Einfache Kategorie-Schaltfläche ohne customtkinter-Overhead."""
-    def __init__(self, parent, label, count, command, selected=False):
+    def __init__(self, parent, label, count, command, selected=False, on_menu=None):
         super().__init__(parent, bg=SURF, height=38, cursor="hand2")
         self.pack_propagate(False)
         self._cmd = command
@@ -131,6 +155,8 @@ class CategoryRow(tk.Frame):
         # Klick überall
         for w in (self, self._lbl, self._badge):
             w.bind("<Button-1>", lambda _: self._cmd())
+            if on_menu:
+                w.bind("<Button-3>", on_menu)
 
     def set_selected(self, v):
         self._selected = v
@@ -157,12 +183,19 @@ class PromptVaultApp(ctk.CTk):
         self.selected = None          # aktuell gewählte Kategorie
         self._cat_rows = {}
         self._overlay = None          # aktives Modal-Overlay
+        self._search_job = None       # Debounce-Timer für Suche
+        self._render_job = None       # Timer für gestaffeltes Rendern
+        self._render_queue = []
 
         self._build_sidebar()
         self._build_content()
         # Erste Kategorie automatisch auswählen
-        if CATEGORIES:
-            self._select(CATEGORIES[0])
+        if self.categories:
+            self._select(self.categories[0])
+
+    @property
+    def categories(self):
+        return list(self.data.keys())
 
     # ═══════════════════════════════════════════════════════════════
     # SIDEBAR
@@ -193,6 +226,11 @@ class PromptVaultApp(ctk.CTk):
         tk.Label(sb, text="CATEGORIES", fg=TXT3, bg=SURF,
                  font=("Segoe UI", 9, "bold")).pack(side="top", anchor="w", padx=18, pady=(10, 4))
 
+        # Neue-Kategorie-Button (unten)
+        ghost_btn(sb, "+ New Category", self._add_category,
+                  color=CYAN, width=200, height=32, font_size=12).pack(
+            side="bottom", fill="x", padx=12, pady=12)
+
         # Kategorie-Canvas (scrollbar)
         self._cat_canvas = tk.Canvas(sb, bg=SURF, highlightthickness=0)
         self._cat_canvas.pack(side="top", fill="both", expand=True, padx=0)
@@ -204,8 +242,11 @@ class PromptVaultApp(ctk.CTk):
             lambda e: self._cat_canvas.configure(scrollregion=self._cat_canvas.bbox("all")))
         self._cat_canvas.bind("<Configure>",
             lambda e: self._cat_canvas.itemconfig(self._cat_win, width=e.width))
-        self._cat_canvas.bind_all("<MouseWheel>",
-            lambda e: self._cat_canvas.yview_scroll(int(-1 * e.delta / 120), "units"))
+        # Mausrad nur scrollen, wenn die Maus über der Sidebar ist
+        def _sb_scroll(e):
+            self._cat_canvas.yview_scroll(int(-1 * e.delta / 120), "units")
+        sb.bind("<Enter>", lambda _: self._cat_canvas.bind_all("<MouseWheel>", _sb_scroll))
+        sb.bind("<Leave>", lambda _: self._cat_canvas.unbind_all("<MouseWheel>"))
 
         self._render_cats()
 
@@ -213,19 +254,37 @@ class PromptVaultApp(ctk.CTk):
         for w in self._cat_inner.winfo_children():
             w.destroy()
         self._cat_rows.clear()
-        for cat in CATEGORIES:
+        for cat in self.categories:
             count = len(self.data.get(cat, []))
             sel = cat == self.selected
             row = CategoryRow(self._cat_inner, cat, count,
                                command=lambda c=cat: self._select(c),
-                               selected=sel)
+                               selected=sel,
+                               on_menu=lambda e, c=cat: self._cat_menu(e, c))
             row.pack(fill="x", padx=6, pady=2)
             self._cat_rows[cat] = row
+
+    def _cat_menu(self, event, cat):
+        menu = tk.Menu(self, tearoff=0, bg=SURF2, fg=TXT,
+                       activebackground=SURF3, activeforeground=CYAN,
+                       relief="flat", borderwidth=0)
+        menu.add_command(label=f"Rename \"{cat}\"", command=lambda: self._rename_category(cat))
+        menu.add_command(label=f"Delete \"{cat}\"", command=lambda: self._del_category(cat))
+        menu.tk_popup(event.x_root, event.y_root)
 
     def _select(self, cat):
         if self.selected and self.selected in self._cat_rows:
             self._cat_rows[self.selected].set_selected(False)
         self.selected = cat
+        if cat is None:
+            self._title_lbl.configure(text="Select Category")
+            self._count_lbl.configure(text="")
+            self._add_btn.configure(state="disabled")
+            self._batch_btn.configure(state="disabled")
+            self._rnd_btn.configure(state="disabled")
+            self._search_var.set("")
+            self._render_prompts()
+            return
         if cat in self._cat_rows:
             self._cat_rows[cat].set_selected(True)
 
@@ -233,6 +292,7 @@ class PromptVaultApp(ctk.CTk):
         self._title_lbl.configure(text=cat)
         self._count_lbl.configure(text=f"{n} Prompt{'s' if n != 1 else ''}")
         self._add_btn.configure(state="normal")
+        self._batch_btn.configure(state="normal")
         self._rnd_btn.configure(state="normal" if n > 0 else "disabled")
         self._search_var.set("")
         self._render_prompts()
@@ -269,12 +329,16 @@ class PromptVaultApp(ctk.CTk):
                                   width=118, height=34, font_size=12, state="disabled")
         self._rnd_btn.pack(side="right", pady=16, padx=(6, 0))
 
+        self._batch_btn = neon_btn(right_grp, "+ Batch", self._add_batch,
+                                    width=100, height=34, font_size=12, state="disabled")
+        self._batch_btn.pack(side="right", pady=16, padx=(6, 0))
+
         self._add_btn = neon_btn(right_grp, "+ Prompt", self._add_prompt,
                                   width=108, height=34, font_size=12, state="disabled")
         self._add_btn.pack(side="right", pady=16, padx=(6, 0))
 
         self._search_var = tk.StringVar()
-        self._search_var.trace_add("write", lambda *_: self._render_prompts())
+        self._search_var.trace_add("write", lambda *_: self._on_search())
         search = ctk.CTkEntry(right_grp, textvariable=self._search_var,
                                placeholder_text="  Search...",
                                width=165, height=34,
@@ -310,9 +374,24 @@ class PromptVaultApp(ctk.CTk):
     # PROMPTS ANZEIGEN
     # ═══════════════════════════════════════════════════════════════
 
+    def _on_search(self):
+        # Debounce: erst rendern, wenn 250 ms lang nichts mehr getippt wurde
+        if self._search_job:
+            self.after_cancel(self._search_job)
+        self._search_job = self.after(250, self._render_prompts)
+
     def _render_prompts(self):
+        if self._search_job:
+            self.after_cancel(self._search_job)
+            self._search_job = None
+        if self._render_job:
+            self.after_cancel(self._render_job)
+            self._render_job = None
+        self._render_queue = []
+
         for w in self._list_inner.winfo_children():
             w.destroy()
+        self._list_canvas.yview_moveto(0)
 
         if not self.selected:
             return
@@ -328,10 +407,19 @@ class PromptVaultApp(ctk.CTk):
                       font=("Segoe UI", 13)).pack(pady=60)
             return
 
-        for row_i, (real_i, prompt) in enumerate(filtered):
-            self._make_card(row_i, real_i, prompt)
+        # Gestaffelt rendern, damit die UI bei vielen Prompts flüssig bleibt
+        self._render_queue = filtered
+        self._render_batch()
 
-    def _make_card(self, row_i, real_i, prompt):
+    def _render_batch(self):
+        self._render_job = None
+        chunk, self._render_queue = self._render_queue[:30], self._render_queue[30:]
+        for real_i, prompt in chunk:
+            self._make_card(real_i, prompt)
+        if self._render_queue:
+            self._render_job = self.after(10, self._render_batch)
+
+    def _make_card(self, real_i, prompt):
         card = tk.Frame(self._list_inner, bg=SURF2,
                          highlightbackground=BORDER, highlightthickness=1)
         card.pack(fill="x", padx=4, pady=5)
@@ -346,12 +434,12 @@ class PromptVaultApp(ctk.CTk):
         btn_f = tk.Frame(hdr, bg=SURF2)
         btn_f.pack(side="right")
 
-        ghost_btn(btn_f, "Copy",    lambda p=prompt: self._copy(p),
-                  width=76, height=24, font_size=10).pack(side="left", padx=2)
-        ghost_btn(btn_f, "Edit",  lambda i=real_i: self._edit_prompt(i),
-                  color=PURP, hover=PURP_DIM, width=88, height=24, font_size=10).pack(side="left", padx=2)
-        danger_btn(btn_f, "Delete",   lambda i=real_i: self._del_prompt(i),
-                   width=74, height=24, font_size=10).pack(side="left", padx=2)
+        flat_btn(btn_f, "Copy",   lambda p=prompt: self._copy(p),
+                 fg=TXT2, hover_fg=CYAN).pack(side="left", padx=2)
+        flat_btn(btn_f, "Edit",   lambda i=real_i: self._edit_prompt(i),
+                 fg=PURP, hover=PURP_DIM).pack(side="left", padx=2)
+        flat_btn(btn_f, "Delete", lambda i=real_i: self._del_prompt(i),
+                 fg=RED, hover=RED_DIM).pack(side="left", padx=2)
 
         # Trennlinie
         tk.Frame(card, height=1, bg=BORDER).pack(fill="x", padx=12, pady=2)
@@ -365,7 +453,7 @@ class PromptVaultApp(ctk.CTk):
     # PROMPT EDITOR (In-Window Overlay — kein Toplevel)
     # ═══════════════════════════════════════════════════════════════
 
-    def _show_editor(self, title="Prompt hinzufügen", initial="", on_save=None):
+    def _show_editor(self, title="Prompt hinzufügen", initial="", on_save=None, hint=None):
         """Zeigt einen modalen Editor als Frame direkt im Hauptfenster."""
         if self._overlay:
             self._overlay.destroy()
@@ -379,7 +467,7 @@ class PromptVaultApp(ctk.CTk):
         # Karte zentriert
         card = ctk.CTkFrame(ov, fg_color=SURF, corner_radius=14,
                              border_width=1, border_color=BORD_H,
-                             width=680, height=400)
+                             width=680, height=440 if hint else 400)
         card.place(relx=0.5, rely=0.5, anchor="center")
         card.grid_propagate(False)
         card.grid_columnconfigure(0, weight=1)
@@ -391,6 +479,9 @@ class PromptVaultApp(ctk.CTk):
         hdr.pack_propagate(False)
         tk.Label(hdr, text=title, fg=CYAN, bg=SURF2,
                   font=("Segoe UI", 14, "bold")).pack(side="left", padx=18, pady=10)
+        if hint:
+            tk.Label(hdr, text=hint, fg=TXT2, bg=SURF2,
+                      font=("Segoe UI", 10)).pack(side="left", padx=(0, 18), pady=10)
 
         # Textbox
         tb = ctk.CTkTextbox(card, font=ctk.CTkFont(family="Consolas", size=13),
@@ -433,6 +524,22 @@ class PromptVaultApp(ctk.CTk):
             self._refresh()
         self._show_editor(title=f"Add Prompt  —  {self.selected}", on_save=on_save)
 
+    def _add_batch(self):
+        def on_save(text):
+            prompts = split_batch(text)
+            if not prompts:
+                return
+            self.data[self.selected].extend(prompts)
+            save_data(self.data)
+            self._refresh()
+            messagebox.showinfo("Batch",
+                f"{len(prompts)} prompt{'s' if len(prompts) != 1 else ''} "
+                f"added to \"{self.selected}\".", parent=self)
+        self._show_editor(
+            title=f"Add Batch  —  {self.selected}",
+            hint="Paste numbered prompts:  1: ...  2. ...  3) ...",
+            on_save=on_save)
+
     def _edit_prompt(self, index):
         cur = self.data[self.selected][index]
         def on_save(text):
@@ -452,6 +559,93 @@ class PromptVaultApp(ctk.CTk):
     def _copy(self, prompt):
         self.clipboard_clear()
         self.clipboard_append(prompt)
+
+    # ═══════════════════════════════════════════════════════════════
+    # KATEGORIE CRUD
+    # ═══════════════════════════════════════════════════════════════
+
+    def _show_name_dialog(self, title, initial="", on_save=None):
+        if self._overlay:
+            self._overlay.destroy()
+
+        ov = tk.Frame(self, bg="#020208")
+        ov.place(x=0, y=0, relwidth=1, relheight=1)
+        ov.lift()
+        self._overlay = ov
+
+        card = ctk.CTkFrame(ov, fg_color=SURF, corner_radius=14,
+                             border_width=1, border_color=BORD_H,
+                             width=420, height=180)
+        card.place(relx=0.5, rely=0.5, anchor="center")
+        card.pack_propagate(False)
+
+        tk.Label(card, text=title, fg=CYAN, bg=SURF,
+                  font=("Segoe UI", 14, "bold")).pack(anchor="w", padx=20, pady=(18, 8))
+
+        name_var = tk.StringVar(value=initial)
+        entry = ctk.CTkEntry(card, textvariable=name_var, width=380, height=36,
+                              fg_color=SURF2, border_color=BORD_H, border_width=1,
+                              text_color=TXT, corner_radius=10, font=cfont(13))
+        entry.pack(padx=20)
+
+        bot = tk.Frame(card, bg=SURF)
+        bot.pack(side="bottom", anchor="e", padx=20, pady=(0, 16))
+
+        def close():
+            ov.destroy()
+            self._overlay = None
+
+        def save(_=None):
+            name = name_var.get().strip()
+            if not name:
+                return
+            if name != initial and name in self.data:
+                messagebox.showwarning("Exists",
+                    f'Category "{name}" already exists.', parent=self)
+                return
+            close()
+            if on_save:
+                on_save(name)
+
+        ghost_btn(bot, "Cancel", close, width=100, height=32, font_size=12).pack(side="left", padx=(0, 8))
+        neon_btn(bot, "Save", save, width=100, height=32, font_size=12).pack(side="left")
+
+        ov.bind("<Escape>", lambda _: close())
+        entry.bind("<Return>", save)
+        entry.focus_set()
+
+    def _add_category(self):
+        def on_save(name):
+            self.data[name] = []
+            save_data(self.data)
+            self._render_cats()
+            self._select(name)
+        self._show_name_dialog("New Category", on_save=on_save)
+
+    def _rename_category(self, cat):
+        def on_save(name):
+            if name == cat:
+                return
+            self.data = {name if k == cat else k: v for k, v in self.data.items()}
+            save_data(self.data)
+            if self.selected == cat:
+                self.selected = name
+            self._render_cats()
+            self._select(self.selected)
+        self._show_name_dialog(f'Rename "{cat}"', initial=cat, on_save=on_save)
+
+    def _del_category(self, cat):
+        n = len(self.data.get(cat, []))
+        if not messagebox.askyesno("Delete Category?",
+                f'Delete "{cat}" with {n} prompt{"s" if n != 1 else ""}?', parent=self):
+            return
+        del self.data[cat]
+        save_data(self.data)
+        if self.selected == cat:
+            self.selected = None
+        self._render_cats()
+        self._select(self.selected if self.selected else
+                     (self.categories[0] if self.categories else None))
 
     # ═══════════════════════════════════════════════════════════════
     # ZUFÄLLIGE PROMPTS (Overlay)
@@ -495,7 +689,7 @@ class PromptVaultApp(ctk.CTk):
                   font=("Segoe UI", 10)).grid(row=0, column=2, padx=(14, 6), pady=(8, 2), sticky="w")
 
         cat_var = ctk.StringVar(value=self.selected)
-        ctk.CTkOptionMenu(ctrl, values=CATEGORIES, variable=cat_var,
+        ctk.CTkOptionMenu(ctrl, values=self.categories, variable=cat_var,
                           width=200, height=34, font=ctk.CTkFont(size=13),
                           fg_color=SURF3, button_color=BORD_H, button_hover_color=PURP_MID,
                           dropdown_fg_color=SURF2, dropdown_text_color=TXT,
@@ -581,9 +775,9 @@ class PromptVaultApp(ctk.CTk):
 
                 tk.Label(h, text=f"#{i+1:02d}", fg=CYAN, bg=SURF2,
                           font=("Consolas", 10, "bold")).pack(side="left")
-                ghost_btn(h, "Copy",
-                          lambda x=p: (self.clipboard_clear(), self.clipboard_append(x)),
-                          width=76, height=22, font_size=10).pack(side="right")
+                flat_btn(h, "Copy",
+                         lambda x=p: (self.clipboard_clear(), self.clipboard_append(x)),
+                         fg=TXT2, hover_fg=CYAN).pack(side="right")
 
                 tk.Frame(c, height=1, bg=BORDER).pack(fill="x", padx=10, pady=1)
 

@@ -6,7 +6,7 @@ datas += collect_data_files('customtkinter')
 
 
 a = Analysis(
-    ['E:\\PromptVault\\main.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
     datas=datas,
@@ -39,5 +39,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['E:\\PromptVault\\icon.ico'],
+    icon=['icon.ico'],
 )
