@@ -262,6 +262,42 @@
 
   /* Editor modal */
   #editor-modal { width: min(680px, 100%); }
+  #editor-hint { font-size: 10px; color: var(--txt2); padding: 8px 18px 0; }
+  #editor-hint:empty { display: none; }
+
+  /* Name modal (new/rename category) */
+  #name-modal { width: min(420px, 100%); }
+  #name-modal input {
+    background: var(--surf2); border: 1px solid var(--bord-h);
+    border-radius: 10px; color: var(--txt); font-size: 13px;
+    height: 36px; padding: 0 12px; margin: 14px 18px 8px; outline: none;
+  }
+  #name-modal input:focus { border-color: var(--cyan); }
+
+  /* New category button */
+  #new-cat-wrap { padding: 8px 10px 0; }
+  #new-cat-btn {
+    width: 100%; height: 32px; border-radius: 8px;
+    border: 1px solid var(--cyan-mid); background: transparent;
+    color: var(--cyan); font-size: 11px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  #new-cat-btn:hover { background: var(--cyan-dim); }
+
+  /* Category context menu */
+  #ctx-menu {
+    position: fixed; z-index: 300; display: none; min-width: 170px;
+    background: var(--surf2); border: 1px solid var(--bord-h);
+    border-radius: 8px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  }
+  #ctx-menu.show { display: block; }
+  #ctx-menu button {
+    display: block; width: 100%; text-align: left;
+    background: transparent; border: none; color: var(--txt);
+    font-size: 12px; padding: 9px 14px; cursor: pointer;
+  }
+  #ctx-menu button:hover { background: var(--surf3); color: var(--cyan); }
+  #ctx-menu button.danger:hover { background: var(--red-dim); color: var(--red); }
 
   /* Toast */
   #toast {
@@ -365,6 +401,9 @@
   </div>
   <div id="cat-label">CATEGORIES</div>
   <div id="cat-list"></div>
+  <div id="new-cat-wrap">
+    <button id="new-cat-btn" onclick="newCategory()">+ New Category</button>
+  </div>
   <div id="sidebar-footer">
     <button onclick="importJSON()">&#8593; Import</button>
     <button class="btn-exp" onclick="exportJSON()">&#8595; Export</button>
@@ -382,6 +421,7 @@
       <input id="search" type="text" placeholder="  Search...">
       <button class="btn btn-purp" id="rnd-btn" disabled onclick="openRandom()">&#9733; Random</button>
       <button class="btn btn-cyan" id="add-btn" disabled onclick="openEditor()">+ Prompt</button>
+      <button class="btn btn-cyan" id="batch-btn" disabled onclick="openBatch()">+ Batch</button>
     </div>
   </div>
   <div id="list-wrap">
@@ -393,6 +433,7 @@
 <div class="overlay hidden" id="editor-overlay" onclick="editorOverlayClick(event)">
   <div class="modal" id="editor-modal">
     <div class="modal-header" id="editor-title">Add Prompt</div>
+    <div id="editor-hint"></div>
     <textarea id="editor-ta" placeholder="Enter your prompt here..."></textarea>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeEditor()">Cancel</button>
@@ -427,6 +468,24 @@
   </div>
 </div>
 
+<!-- ── NAME OVERLAY (new / rename category) ── -->
+<div class="overlay hidden" id="name-overlay" onclick="nameOverlayClick(event)">
+  <div class="modal" id="name-modal">
+    <div class="modal-header" id="name-title">New Category</div>
+    <input type="text" id="name-input" placeholder="Category name...">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeNameModal()">Cancel</button>
+      <button class="btn btn-cyan"  onclick="saveNameModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CATEGORY CONTEXT MENU ── -->
+<div id="ctx-menu">
+  <button onclick="ctxRename()">Rename</button>
+  <button class="danger" onclick="ctxDelete()">Delete</button>
+</div>
+
 <!-- ── HIDDEN FILE INPUT FOR IMPORT ── -->
 <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleImport(event)">
 
@@ -434,78 +493,209 @@
 <div id="toast">Copied!</div>
 
 <script>
-const CATEGORIES = ["Clothing", "Hairstyle", "Environment", "Appearance", "Position", "Character"];
+const DEFAULT_CATEGORIES = ["Clothing", "Hairstyle", "Environment", "Appearance", "Position", "Character"];
 const STORAGE_KEY = "promptvault_data";
+const BACKUP_KEY  = "promptvault_data_backup";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    const data = raw ? JSON.parse(raw) : {};
-    let changed = false;
-    for (const cat of CATEGORIES) {
-      if (!Array.isArray(data[cat])) { data[cat] = []; changed = true; }
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && typeof d === "object" && !Array.isArray(d)) return d;
     }
-    if (changed) saveData(data);
-    return data;
-  } catch {
-    const data = {};
-    CATEGORIES.forEach(c => data[c] = []);
-    return data;
-  }
+  } catch {}
+  const d = {};
+  DEFAULT_CATEGORIES.forEach(c => d[c] = []);
+  return d;
 }
 
 function saveData(data) {
+  // Sicherheitskopie der letzten Version, dann speichern
+  const cur = localStorage.getItem(STORAGE_KEY);
+  if (cur !== null) localStorage.setItem(BACKUP_KEY, cur);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function cats() { return Object.keys(data); }
+
+function splitBatch(text) {
+  const marker = /(?:^|[\s,;])\s*\d{1,3}\s*[.:)]\s+/;
+  if (marker.test("\n" + text)) {
+    return ("\n" + text).split(new RegExp(marker.source, "g"))
+      .map(p => p.trim().replace(/^[,;]+|[,;]+$/g, "").trim())
+      .filter(Boolean);
+  }
+  return text.split("\n").map(l => l.trim()).filter(Boolean);
 }
 
 let data = loadData();
 let selected = null;
 let editIndex = null;
+let batchMode = false;
 let lastRndResults = [];
 
 // ── Sidebar + Mobile tabs ─────────────────────────────────────────────────────
+
+function attachCatMenu(el, cat) {
+  el.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    openCtxMenu(e.clientX, e.clientY, cat);
+  });
+  // Long-press für Touch-Geräte
+  let pressTimer = null;
+  el.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    pressTimer = setTimeout(() => {
+      ignoreNextClick = true;
+      openCtxMenu(t.clientX, t.clientY, cat);
+    }, 600);
+  }, { passive: true });
+  ["touchend", "touchmove", "touchcancel"].forEach(ev =>
+    el.addEventListener(ev, () => clearTimeout(pressTimer), { passive: true }));
+}
 
 function renderSidebar() {
   // Desktop sidebar
   const list = document.getElementById("cat-list");
   list.innerHTML = "";
-  for (const cat of CATEGORIES) {
+  for (const cat of cats()) {
     const count = (data[cat] || []).length;
     const sel = cat === selected;
     const row = document.createElement("div");
     row.className = "cat-row" + (sel ? " selected" : "");
     row.innerHTML = `
       <div class="cat-bar"></div>
-      <div class="cat-name">${cat}</div>
+      <div class="cat-name">${escHtml(cat)}</div>
       <div class="cat-badge">${count}</div>`;
     row.onclick = () => selectCat(cat);
+    attachCatMenu(row, cat);
     list.appendChild(row);
   }
 
   // Mobile tabs
   const tabs = document.getElementById("mob-cats");
   tabs.innerHTML = "";
-  for (const cat of CATEGORIES) {
+  for (const cat of cats()) {
     const tab = document.createElement("div");
     tab.className = "mob-cat" + (cat === selected ? " selected" : "");
     tab.textContent = cat;
     tab.onclick = () => selectCat(cat);
+    attachCatMenu(tab, cat);
     tabs.appendChild(tab);
   }
+  const plus = document.createElement("div");
+  plus.className = "mob-cat";
+  plus.textContent = "+";
+  plus.onclick = newCategory;
+  tabs.appendChild(plus);
 }
 
 function selectCat(cat) {
   selected = cat;
   document.getElementById("search").value = "";
+  if (!cat) {
+    document.getElementById("title-lbl").textContent = "Select a category";
+    document.getElementById("count-lbl").textContent = "";
+    document.getElementById("add-btn").disabled = true;
+    document.getElementById("batch-btn").disabled = true;
+    document.getElementById("rnd-btn").disabled = true;
+    renderSidebar();
+    renderPrompts();
+    return;
+  }
   document.getElementById("title-lbl").textContent = cat;
   const n = (data[cat] || []).length;
   document.getElementById("count-lbl").textContent = n + " Prompt" + (n !== 1 ? "s" : "");
   document.getElementById("add-btn").disabled = false;
+  document.getElementById("batch-btn").disabled = false;
   document.getElementById("rnd-btn").disabled = n === 0;
   renderSidebar();
   renderPrompts();
+}
+
+// ── Kategorien: anlegen / umbenennen / löschen ───────────────────────────────
+
+let ctxCat = null;
+let nameMode = null;        // "new" | "rename"
+let ignoreNextClick = false;
+
+function openCtxMenu(x, y, cat) {
+  ctxCat = cat;
+  const m = document.getElementById("ctx-menu");
+  m.classList.add("show");
+  const r = m.getBoundingClientRect();
+  m.style.left = Math.min(x, window.innerWidth  - r.width  - 8) + "px";
+  m.style.top  = Math.min(y, window.innerHeight - r.height - 8) + "px";
+}
+
+function closeCtxMenu() {
+  document.getElementById("ctx-menu").classList.remove("show");
+}
+
+document.addEventListener("click", () => {
+  if (ignoreNextClick) { ignoreNextClick = false; return; }
+  closeCtxMenu();
+});
+document.addEventListener("scroll", closeCtxMenu, true);
+
+function newCategory() {
+  nameMode = "new";
+  openNameModal("New Category", "");
+}
+
+function ctxRename() {
+  nameMode = "rename";
+  openNameModal(`Rename "${ctxCat}"`, ctxCat);
+}
+
+function ctxDelete() {
+  const n = (data[ctxCat] || []).length;
+  if (!confirm(`Delete "${ctxCat}" with ${n} prompt${n !== 1 ? "s" : ""}?`)) return;
+  delete data[ctxCat];
+  saveData(data);
+  if (selected === ctxCat) selected = null;
+  selectCat(selected || cats()[0] || null);
+}
+
+function openNameModal(title, initial) {
+  document.getElementById("name-title").textContent = title;
+  const inp = document.getElementById("name-input");
+  inp.value = initial;
+  document.getElementById("name-overlay").classList.remove("hidden");
+  inp.focus();
+}
+
+function closeNameModal() {
+  document.getElementById("name-overlay").classList.add("hidden");
+}
+
+function nameOverlayClick(e) {
+  if (e.target === document.getElementById("name-overlay")) closeNameModal();
+}
+
+function saveNameModal() {
+  const name = document.getElementById("name-input").value.trim();
+  if (!name) return;
+  if (name in data && !(nameMode === "rename" && name === ctxCat)) {
+    alert(`Category "${name}" already exists.`);
+    return;
+  }
+  closeNameModal();
+  if (nameMode === "new") {
+    data[name] = [];
+    saveData(data);
+    selectCat(name);
+  } else if (nameMode === "rename" && name !== ctxCat) {
+    const renamed = {};
+    for (const k of cats()) renamed[k === ctxCat ? name : k] = data[k];
+    data = renamed;
+    saveData(data);
+    if (selected === ctxCat) selected = name;
+    selectCat(selected);
+  }
 }
 
 // ── Prompt List ───────────────────────────────────────────────────────────────
@@ -570,10 +760,24 @@ function refresh() {
 
 function openEditor(index = null) {
   editIndex = index;
+  batchMode = false;
   const title = document.getElementById("editor-title");
   const ta    = document.getElementById("editor-ta");
+  document.getElementById("editor-hint").textContent = "";
   title.textContent = index === null ? `Add Prompt  —  ${selected}` : "Edit Prompt";
   ta.value = index === null ? "" : data[selected][index];
+  document.getElementById("editor-overlay").classList.remove("hidden");
+  ta.focus();
+}
+
+function openBatch() {
+  editIndex = null;
+  batchMode = true;
+  document.getElementById("editor-title").textContent = `Add Batch  —  ${selected}`;
+  document.getElementById("editor-hint").textContent =
+    "Paste numbered prompts:  1: ...  2. ...  3) ...";
+  const ta = document.getElementById("editor-ta");
+  ta.value = "";
   document.getElementById("editor-overlay").classList.remove("hidden");
   ta.focus();
 }
@@ -585,6 +789,16 @@ function closeEditor() {
 function saveEditor() {
   const text = document.getElementById("editor-ta").value.trim();
   if (!text) return;
+  if (batchMode) {
+    const prompts = splitBatch(text);
+    if (!prompts.length) return;
+    data[selected].push(...prompts);
+    saveData(data);
+    closeEditor();
+    refresh();
+    showToast(`${prompts.length} prompt${prompts.length !== 1 ? "s" : ""} added!`);
+    return;
+  }
   if (editIndex === null) data[selected].push(text);
   else data[selected][editIndex] = text;
   saveData(data);
@@ -600,7 +814,7 @@ function editorOverlayClick(e) {
 
 function openRandom() {
   const sel = document.getElementById("rnd-cat");
-  sel.innerHTML = CATEGORIES.map(c => `<option${c === selected ? " selected" : ""}>${c}</option>`).join("");
+  sel.innerHTML = cats().map(c => `<option${c === selected ? " selected" : ""}>${escHtml(c)}</option>`).join("");
   document.getElementById("rnd-results").innerHTML = "";
   document.getElementById("rnd-info").textContent = "";
   document.getElementById("copy-all-btn").disabled = true;
@@ -688,12 +902,15 @@ function handleImport(e) {
         throw new Error("Invalid format");
 
       const merged = { ...data };
-      for (const cat of CATEGORIES) {
-        if (Array.isArray(imported[cat])) {
-          // merge: add prompts that don't already exist
-          const existing = new Set(merged[cat]);
-          for (const p of imported[cat]) {
-            if (!existing.has(p)) { merged[cat].push(p); existing.add(p); }
+      for (const cat of Object.keys(imported)) {
+        if (!Array.isArray(imported[cat])) continue;
+        // merge: unbekannte Kategorien anlegen, doppelte Prompts überspringen
+        if (!Array.isArray(merged[cat])) merged[cat] = [];
+        const existing = new Set(merged[cat]);
+        for (const p of imported[cat]) {
+          if (typeof p === "string" && !existing.has(p)) {
+            merged[cat].push(p);
+            existing.add(p);
           }
         }
       }
@@ -734,15 +951,25 @@ function showToast(msg) {
 // ── Keyboard shortcuts ────────────────────────────────────────────────────────
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { closeEditor(); closeRandom(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") saveEditor();
+  if (e.key === "Escape") { closeEditor(); closeRandom(); closeNameModal(); closeCtxMenu(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter" &&
+      !document.getElementById("editor-overlay").classList.contains("hidden")) saveEditor();
 });
 
-document.getElementById("search").addEventListener("input", renderPrompts);
+document.getElementById("name-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") saveNameModal();
+});
+
+// Suche entprellt: erst rendern, wenn 200 ms nicht mehr getippt wurde
+let searchTimer;
+document.getElementById("search").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(renderPrompts, 200);
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderSidebar();
-if (CATEGORIES.length) selectCat(CATEGORIES[0]);
+selectCat(cats()[0] || null);
 </script>
 </body>
 </html>
