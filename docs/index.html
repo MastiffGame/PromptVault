@@ -14,9 +14,10 @@
     --surf3:    #14142e;
     --border:   #1c1c38;
     --bord-h:   #2c2c55;
-    --cyan:     #00d4ff;
-    --cyan-dim: #002233;
-    --cyan-mid: #004d66;
+    --sel:      #1b2a4a;
+    --acc:      #00d4ff;
+    --acc-dim:  #002233;
+    --acc-mid:  #004d66;
     --purp:     #a78bfa;
     --purp-dim: #1a0d40;
     --purp-mid: #3d2080;
@@ -25,1768 +26,1761 @@
     --red-mid:  #4a1010;
     --gold:     #fbbf24;
     --gold-dim: #2a2008;
+    --green:    #4ade80;
     --txt:      #dce4f5;
     --txt2:     #4a5a78;
     --txt3:     #222840;
+    --overlay:  rgba(2,2,8,0.85);
+  }
+  :root[data-theme="light"] {
+    --bg:       #eef0f6;
+    --surf:     #ffffff;
+    --surf2:    #f5f6fb;
+    --surf3:    #e6e8f2;
+    --border:   #d6d9e6;
+    --bord-h:   #bfc4d8;
+    --sel:      #dbe4ff;
+    --purp:     #6d28d9;
+    --purp-dim: #ede9fe;
+    --purp-mid: #ddd6fe;
+    --red:      #dc2626;
+    --red-dim:  #fee2e2;
+    --red-mid:  #fecaca;
+    --gold:     #b45309;
+    --gold-dim: #fef3c7;
+    --green:    #15803d;
+    --txt:      #161a2b;
+    --txt2:     #5b6480;
+    --txt3:     #9aa1b8;
+    --overlay:  rgba(200,204,216,0.85);
   }
 
   html, body { height: 100%; }
-
   body {
-    background: var(--bg);
-    color: var(--txt);
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
+    background: var(--bg); color: var(--txt);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    display: flex; height: 100vh; overflow: hidden;
   }
+  button { font-family: inherit; }
+  input, textarea, select { font-family: inherit; color: var(--txt); }
 
-  /* ══════════════════════════════════════════
-     SIDEBAR (desktop)
-  ══════════════════════════════════════════ */
+  /* ══ SIDEBAR ══ */
   #sidebar {
-    width: 240px;
-    min-width: 240px;
-    background: var(--surf);
+    width: 240px; min-width: 240px; background: var(--surf);
     border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    display: flex; flex-direction: column; overflow: hidden;
   }
-
-  #logo {
-    height: 80px;
-    min-height: 80px;
-    padding: 18px 18px 0;
-    border-bottom: 1px solid var(--border);
-  }
+  #logo { height: 80px; min-height: 80px; padding: 18px 18px 0; border-bottom: 1px solid var(--border); position: relative; }
   #logo .logo-line { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
-  #logo .logo-line span:first-child { color: var(--cyan); }
+  #logo .logo-line span:first-child { color: var(--acc); }
   #logo .logo-line span:last-child  { color: var(--purp); }
   #logo .logo-sub { font-size: 9px; color: var(--txt2); margin-top: 4px; }
+  #logo .icons { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+  .icon-btn { background: none; border: none; color: var(--txt2); cursor: pointer; font-size: 14px; padding: 2px 4px; }
+  .icon-btn:hover { color: var(--acc); }
 
-  /* View-Tabs (Library / Builder) */
   #view-tabs { display: flex; gap: 6px; padding: 10px 10px 0; }
   .view-tab {
-    flex: 1; height: 30px; border-radius: 8px;
-    border: 1px solid var(--border); background: var(--surf2);
-    color: var(--txt2); font-size: 11px; font-weight: bold;
+    flex: 1; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surf2); color: var(--txt2); font-size: 11px; font-weight: bold;
     cursor: pointer; transition: all 0.15s;
   }
   .view-tab:hover { background: var(--surf3); }
-  .view-tab.active { background: var(--purp-dim); border-color: var(--purp); color: var(--purp); }
+  .view-tab.active { background: var(--acc-dim); border-color: var(--acc); color: var(--acc); }
 
-  #cat-label {
-    font-size: 9px; font-weight: bold; color: var(--txt3);
-    padding: 10px 18px 4px; letter-spacing: 1px;
-  }
-
-  #cat-list {
-    flex: 1; overflow-y: auto; padding: 4px 6px;
-  }
+  #cat-head { display: flex; align-items: center; padding: 10px 18px 4px; }
+  #cat-label { font-size: 9px; font-weight: bold; color: var(--txt3); letter-spacing: 1px; flex: 1; }
+  #cat-list { flex: 1; overflow-y: auto; padding: 4px 6px; }
   #cat-list::-webkit-scrollbar { width: 4px; }
   #cat-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
   .cat-row {
-    display: flex; align-items: center; height: 38px;
-    border-radius: 6px; margin: 2px 0; cursor: pointer;
-    background: var(--surf); transition: background 0.15s;
+    display: flex; align-items: center; height: 38px; border-radius: 6px; margin: 2px 0;
+    cursor: pointer; background: var(--surf); transition: background 0.15s;
   }
   .cat-row:hover { background: var(--surf3); }
   .cat-row.selected { background: var(--surf3); }
+  .cat-row.drag-over { outline: 1px solid var(--acc); }
+  .cat-bar { width: 3px; height: 26px; border-radius: 2px; background: transparent; margin: 0 6px 0 4px; flex-shrink: 0; }
+  .cat-row.selected .cat-bar { background: var(--acc); }
+  .cat-name { flex: 1; font-size: 13px; color: var(--txt); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cat-row.selected .cat-name { color: var(--acc); }
+  .cat-badge { font-size: 10px; font-weight: bold; color: var(--txt2); background: var(--surf3); padding: 2px 7px; border-radius: 10px; margin-right: 8px; }
+  .cat-row.selected .cat-badge { color: var(--acc); background: var(--acc-dim); }
 
-  .cat-bar {
-    width: 3px; height: 26px; border-radius: 2px;
-    background: transparent; margin: 0 6px 0 4px; flex-shrink: 0;
-    transition: background 0.15s;
-  }
-  .cat-row.selected .cat-bar { background: var(--cyan); }
-
-  .cat-name { flex: 1; font-size: 13px; color: var(--txt); transition: color 0.15s; }
-  .cat-row.selected .cat-name { color: var(--cyan); }
-
-  .cat-badge {
-    font-size: 10px; font-weight: bold; color: var(--txt2);
-    background: var(--surf3); padding: 2px 7px; border-radius: 10px;
-    margin-right: 8px; transition: color 0.15s, background 0.15s;
-  }
-  .cat-row.selected .cat-badge { color: var(--cyan); background: var(--cyan-dim); }
-
-  /* Sidebar footer: import / export */
-  #sidebar-footer {
-    border-top: 1px solid var(--border);
-    padding: 10px 10px;
-    display: flex;
-    gap: 6px;
-  }
+  #sidebar-tools { display: flex; gap: 4px; padding: 6px 10px 0; }
+  #sidebar-tools button { flex: 1; height: 26px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--txt2); font-size: 12px; cursor: pointer; }
+  #sidebar-tools button:hover { background: var(--surf3); color: var(--txt); }
+  #sidebar-footer { padding: 6px 10px; display: flex; gap: 6px; }
   #sidebar-footer button {
     flex: 1; height: 32px; border-radius: 8px; border: 1px solid var(--bord-h);
-    background: transparent; color: var(--txt2); font-size: 11px;
-    cursor: pointer; transition: background 0.15s;
+    background: transparent; color: var(--txt2); font-size: 11px; cursor: pointer;
   }
   #sidebar-footer button:hover { background: var(--surf3); color: var(--txt); }
-  #sidebar-footer .btn-exp { border-color: var(--cyan-mid); color: var(--cyan); }
-  #sidebar-footer .btn-exp:hover { background: var(--cyan-dim); }
-  #privacy-wrap { padding: 0 10px 10px; }
-  #privacy-link {
-    display: flex; align-items: center; justify-content: center;
-    width: 100%; height: 32px; border-radius: 8px;
-    border: 1px solid var(--cyan-mid); background: transparent;
-    color: var(--cyan); font-size: 11px; cursor: pointer;
-    text-decoration: none; transition: background 0.15s;
-  }
-  #privacy-link:hover { background: var(--cyan-dim); }
+  #new-cat-wrap { padding: 0 10px 8px; }
+  #new-cat-btn { width: 100%; height: 32px; border-radius: 8px; border: 1px solid var(--acc-mid); background: transparent; color: var(--acc); font-size: 11px; cursor: pointer; }
+  #new-cat-btn:hover { background: var(--acc-dim); }
+  #privacy-wrap { padding: 0 10px 10px; text-align: center; }
+  #privacy-link { font-size: 10px; color: var(--txt2); text-decoration: none; }
+  #privacy-link:hover { color: var(--acc); }
 
-  /* ══════════════════════════════════════════
-     CONTENT
-  ══════════════════════════════════════════ */
-  #content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
+  /* ══ CONTENT ══ */
+  #content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
   #lib-view, #builder-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  #lib-view.hidden, #builder-view.hidden { display: none; }
+  .hidden { display: none !important; }
 
-  #topbar, #b-topbar {
-    min-height: 66px; background: var(--surf);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center;
-    justify-content: space-between;
-    padding: 0 18px 0 22px; gap: 10px; flex-wrap: wrap;
+  .topbar {
+    min-height: 66px; background: var(--surf); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 18px 8px 22px; gap: 10px; flex-wrap: wrap;
   }
+  .top-left { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .top-title { font-size: 17px; font-weight: bold; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top-sub { font-size: 10px; color: var(--txt2); margin-top: 2px; }
+  .top-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-  #top-left, #top-left-b { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-  #title-lbl, #b-title { font-size: 17px; font-weight: bold; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #count-lbl, #b-sub { font-size: 10px; color: var(--txt2); margin-top: 2px; }
-
-  #top-right, #b-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-  #all-wrap {
-    display: flex; align-items: center; gap: 5px;
-    color: var(--txt2); font-size: 11px; cursor: pointer; user-select: none;
+  .chk { display: flex; align-items: center; gap: 5px; color: var(--txt2); font-size: 11px; cursor: pointer; user-select: none; }
+  .chk input { accent-color: var(--acc); cursor: pointer; }
+  select.sel, input.inp, textarea.ta {
+    background: var(--surf2); border: 1px solid var(--bord-h); border-radius: 10px;
+    color: var(--txt); font-size: 12px; padding: 0 12px; height: 34px; outline: none;
   }
-  #all-wrap input { accent-color: var(--cyan); cursor: pointer; }
+  select.sel { cursor: pointer; }
+  input.inp:focus, textarea.ta:focus, select.sel:focus { border-color: var(--acc); }
+  input.inp::placeholder { color: var(--txt2); }
+  textarea.ta { padding: 8px 12px; height: auto; resize: vertical; line-height: 1.5; }
+  input#search { width: 200px; }
 
-  input#search {
-    background: var(--surf2); border: 1px solid var(--bord-h);
-    border-radius: 10px; color: var(--txt); font-size: 12px;
-    padding: 0 14px; height: 34px; width: 160px; outline: none;
-    transition: border-color 0.15s;
-  }
-  input#search::placeholder { color: var(--txt2); }
-  input#search:focus { border-color: var(--cyan); }
-
-  /* ══════════════════════════════════════════
-     BUTTONS
-  ══════════════════════════════════════════ */
+  /* ══ BUTTONS ══ */
   .btn {
-    height: 34px; border-radius: 10px; border: 1px solid;
-    font-weight: bold; font-size: 13px; cursor: pointer;
-    padding: 0 16px; transition: background 0.15s; white-space: nowrap;
+    height: 34px; border-radius: 10px; border: 1px solid; font-weight: bold; font-size: 13px;
+    cursor: pointer; padding: 0 16px; transition: background 0.15s; white-space: nowrap;
   }
   .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-acc   { background: var(--acc-dim);  border-color: var(--acc);  color: var(--acc); }
+  .btn-acc:not(:disabled):hover  { background: var(--acc-mid); }
+  .btn-purp  { background: var(--purp-dim); border-color: var(--purp); color: var(--purp); }
+  .btn-purp:not(:disabled):hover { background: var(--purp-mid); }
+  .btn-gold  { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+  .btn-gold:not(:disabled):hover { filter: brightness(1.2); }
+  .btn-red   { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+  .btn-red:not(:disabled):hover { background: var(--red-mid); }
+  .btn-ghost { background: transparent; border-color: var(--bord-h); color: var(--txt2); font-size: 11px; height: 26px; border-radius: 8px; padding: 0 10px; font-weight: normal; }
+  .btn-ghost:hover { background: var(--surf3); color: var(--txt); }
+  .btn-ghost.on { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .btn-ghost.acc { color: var(--acc); }
+  .btn-ghost.purp { color: var(--purp); }
+  .btn-ghost.purp:hover { background: var(--purp-dim); }
+  .btn-ghost.danger { color: var(--red); }
+  .btn-ghost.danger:hover { background: var(--red-dim); }
+  .btn-ghost.gold { color: var(--gold); }
+  .btn.tall { height: 34px; border-radius: 10px; font-size: 12px; }
 
-  .btn-cyan  { background: var(--cyan-dim);  border-color: var(--cyan);  color: var(--cyan); }
-  .btn-cyan:not(:disabled):hover  { background: var(--cyan-mid); }
-  .btn-purp  { background: var(--purp-dim);  border-color: var(--purp);  color: var(--purp); }
-  .btn-purp:not(:disabled):hover  { background: var(--purp-mid); }
-  .btn-gold  { background: var(--gold-dim);  border-color: var(--gold);  color: var(--gold); }
-  .btn-gold:not(:disabled):hover  { background: #3d3010; }
-  .fav-on { border-color: var(--gold) !important; color: var(--gold) !important; background: var(--gold-dim) !important; }
+  /* ══ BARS ══ */
+  #tag-bar { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 8px 18px 0; }
+  #tag-bar:empty { display: none; }
+  .bar-label { font-size: 9px; font-weight: bold; color: var(--txt3); letter-spacing: 1px; margin-right: 6px; }
+  .chip {
+    font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px;
+    background: var(--surf2); color: var(--txt2); border: 1px solid transparent; cursor: default; white-space: nowrap;
+  }
+  .chip.click { cursor: pointer; }
+  .chip.click:hover { border-color: var(--bord-h); }
+  .chip.on { background: var(--acc-dim); color: var(--acc); }
+  .chip.purp { color: var(--purp); background: var(--purp-dim); }
+  .chip.red { color: var(--red); background: var(--red-dim); }
+  .chip.acc { color: var(--acc); background: var(--acc-dim); }
+  #bulk-bar {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 18px 0;
+    padding: 6px 8px; background: var(--surf2); border: 1px solid var(--acc); border-radius: 8px;
+  }
+  #bulk-bar .count { color: var(--acc); font-weight: bold; font-size: 11px; margin-right: 6px; }
+  #bulk-bar .spacer { flex: 1; }
 
-  .btn-ghost {
-    background: transparent; border-color: var(--bord-h); color: var(--txt2);
-    font-size: 11px; height: 26px; border-radius: 8px; padding: 0 10px; font-weight: normal;
-  }
-  .btn-ghost:hover { background: var(--surf3); }
-  .btn-ghost-purp {
-    background: transparent; border-color: var(--bord-h); color: var(--purp);
-    font-size: 11px; height: 26px; border-radius: 8px; padding: 0 10px; font-weight: normal;
-  }
-  .btn-ghost-purp:hover { background: var(--purp-dim); }
-  .btn-danger {
-    background: var(--red-dim); border-color: var(--red); color: var(--red);
-    font-size: 11px; height: 26px; border-radius: 8px; padding: 0 10px; font-weight: normal;
-  }
-  .btn-danger:hover { background: var(--red-mid); }
-
-  /* ══════════════════════════════════════════
-     PROMPT LIST
-  ══════════════════════════════════════════ */
+  /* ══ LISTS ══ */
   #list-wrap, #slot-wrap { flex: 1; overflow-y: auto; padding: 12px 14px; }
   #list-wrap::-webkit-scrollbar, #slot-wrap::-webkit-scrollbar { width: 6px; }
   #list-wrap::-webkit-scrollbar-thumb, #slot-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
   .empty-msg { color: var(--txt2); font-size: 13px; text-align: center; margin-top: 60px; line-height: 1.7; }
 
-  .card {
-    background: var(--surf2); border: 1px solid var(--border);
-    border-radius: 8px; margin-bottom: 10px; overflow: hidden;
-  }
-  .card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 12px 4px;
-  }
-  .card-num { font-family: Consolas, monospace; font-size: 10px; font-weight: bold; color: var(--cyan); }
-  .card-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+  .card { background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+  .card.selected { background: var(--sel); border-color: var(--acc); }
+  .card.drag-over { border-color: var(--acc); }
+  .card.negative { border-color: var(--red-mid); }
+  .card.locked { border-color: var(--acc); }
+  .card-header { display: flex; align-items: center; gap: 6px; padding: 8px 12px 4px; flex-wrap: wrap; }
+  .card-num { font-family: Consolas, monospace; font-size: 10px; font-weight: bold; color: var(--acc); }
+  .card-title { font-size: 12px; font-weight: bold; color: var(--txt); }
+  .card-btns { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
   .card-divider { height: 1px; background: var(--border); margin: 2px 12px; }
-  .card-text {
-    font-family: Consolas, monospace; font-size: 12px; color: var(--txt);
-    padding: 4px 12px 10px; line-height: 1.5; word-break: break-word;
-  }
-  .card-cat {
-    font-size: 10px; color: var(--purp); background: var(--purp-dim);
-    padding: 2px 8px; border-radius: 10px; margin-left: 8px; white-space: nowrap;
-  }
+  .card-text { font-family: Consolas, monospace; font-size: 12px; color: var(--txt); padding: 4px 12px 8px; line-height: 1.5; word-break: break-word; cursor: pointer; }
+  .card-text.none { color: var(--txt2); font-style: italic; cursor: default; }
+  .card-foot { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 0 12px 8px; font-size: 9px; color: var(--txt3); }
+  .card-foot .right { margin-left: auto; display: flex; gap: 10px; }
+  .grip { color: var(--txt3); cursor: grab; font-size: 12px; user-select: none; padding: 0 2px; }
+  .cb { cursor: pointer; font-size: 14px; color: var(--txt2); user-select: none; }
+  .cb.on { color: var(--acc); }
+  .slot-name { font-size: 12px; font-weight: bold; color: var(--purp); }
+  .slot-name.txt { color: var(--acc); }
+  .slot-name.missing { color: var(--red); }
 
-  /* ══════════════════════════════════════════
-     BUILDER (Baukasten)
-  ══════════════════════════════════════════ */
-  .slot-card {
-    background: var(--surf2); border: 1px solid var(--border);
-    border-radius: 8px; margin-bottom: 10px; overflow: hidden;
-  }
-  .slot-card.locked { border-color: var(--gold); }
-  .slot-head { display: flex; align-items: center; gap: 4px; padding: 8px 12px 4px; flex-wrap: wrap; }
-  .slot-idx { font-family: Consolas, monospace; font-size: 10px; font-weight: bold; color: var(--purp); }
-  .slot-name { font-size: 12px; font-weight: bold; color: var(--txt); flex: 1; min-width: 70px; margin-left: 4px; }
-  .slot-name.txt { color: var(--gold); }
-  .slot-val {
-    font-family: Consolas, monospace; font-size: 12px; color: var(--txt);
-    padding: 4px 12px 10px; line-height: 1.5; word-break: break-word;
-  }
-  .slot-val.none { color: var(--txt2); font-style: italic; }
-
-  #result-bar {
-    background: var(--surf); border-top: 1px solid var(--border);
-    padding: 10px 14px; flex-shrink: 0;
-  }
-  #result-text {
+  /* ══ RESULT BAR ══ */
+  #result-bar { background: var(--surf); border-top: 1px solid var(--border); padding: 10px 14px; flex-shrink: 0; }
+  #result-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+  #tok-lbl { font-size: 10px; color: var(--txt2); }
+  #tok-lbl.warn { color: var(--red); }
+  #tpl-lbl { font-size: 10px; color: var(--purp); font-weight: bold; }
+  #result-text, #neg-text {
     font-family: Consolas, monospace; font-size: 12px; color: var(--txt);
     background: var(--surf2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px 10px; margin-bottom: 8px; min-height: 36px;
-    max-height: 110px; overflow-y: auto; word-break: break-word;
+    padding: 8px 10px; margin-bottom: 8px; min-height: 36px; max-height: 110px; overflow-y: auto; word-break: break-word;
   }
   #result-text.empty { color: var(--txt2); font-style: italic; }
+  #neg-wrap { display: flex; gap: 8px; align-items: flex-start; }
+  #neg-wrap .lbl { font-size: 9px; font-weight: bold; color: var(--red); margin-top: 8px; letter-spacing: 1px; }
+  #neg-text { flex: 1; color: var(--txt2); }
   #result-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .sep-lbl { font-size: 10px; color: var(--txt2); }
-  #sep-input {
-    background: var(--surf2); border: 1px solid var(--bord-h); border-radius: 8px;
-    color: var(--txt); font-size: 12px; height: 30px; width: 70px;
-    text-align: center; outline: none;
-  }
-  #sep-input:focus { border-color: var(--cyan); }
+  #sep-input { width: 70px; height: 30px; text-align: center; padding: 0; }
 
-  /* ══════════════════════════════════════════
-     MODALS
-  ══════════════════════════════════════════ */
-  .overlay {
-    position: fixed; inset: 0; background: rgba(2,2,8,0.85);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100; padding: 12px;
-  }
-  .overlay.hidden { display: none; }
-
+  /* ══ MODALS ══ */
+  #modal-root { position: fixed; inset: 0; background: var(--overlay); display: none; align-items: center; justify-content: center; z-index: 100; padding: 12px; }
+  #modal-root.show { display: flex; }
   .modal {
-    background: var(--surf); border: 1px solid var(--bord-h);
-    border-radius: 14px; display: flex; flex-direction: column;
-    overflow: hidden; max-height: 95vh; max-width: 100%;
+    background: var(--surf); border: 1px solid var(--bord-h); border-radius: 14px;
+    display: flex; flex-direction: column; overflow: hidden; max-height: 95vh; max-width: 100%; width: 680px;
   }
-  .modal-header {
-    background: var(--surf2); padding: 14px 18px;
-    font-size: 14px; font-weight: bold; color: var(--cyan); flex-shrink: 0;
-  }
-  .modal textarea {
-    background: var(--surf2); border: 1px solid var(--bord-h);
-    border-radius: 10px; color: var(--txt);
-    font-family: Consolas, monospace; font-size: 13px;
-    resize: none; outline: none; padding: 10px 12px;
-    margin: 14px 18px 8px; flex: 1; min-height: 160px;
-  }
-  .modal textarea:focus { border-color: var(--cyan); }
-  .modal-footer {
-    display: flex; justify-content: flex-end; gap: 8px;
-    padding: 8px 18px 16px; flex-shrink: 0;
-  }
+  .modal-header { background: var(--surf2); padding: 12px 18px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .modal-title { font-size: 14px; font-weight: bold; color: var(--acc); }
+  .modal-title.purp { color: var(--purp); }
+  .modal-hint { font-size: 10px; color: var(--txt2); flex: 1; }
+  .modal-x { margin-left: auto; background: none; border: 1px solid transparent; color: var(--txt2); cursor: pointer; font-size: 14px; padding: 2px 8px; border-radius: 6px; }
+  .modal-x:hover { color: var(--red); background: var(--red-dim); }
+  .modal-body { padding: 14px 18px 6px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .modal-body::-webkit-scrollbar { width: 5px; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 8px 18px 16px; flex-shrink: 0; flex-wrap: wrap; }
+  .modal-footer .left { margin-right: auto; }
   .modal-footer .btn { font-size: 12px; height: 34px; }
+  .lbl { font-size: 10px; color: var(--txt2); }
+  .lbl-sec { font-size: 10px; font-weight: bold; color: var(--acc); letter-spacing: 1px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .row .grow { flex: 1; min-width: 120px; }
+  .form-row { display: flex; align-items: center; gap: 10px; }
+  .form-row .k { width: 170px; font-size: 11px; color: var(--txt2); flex-shrink: 0; }
+  .hint { font-size: 9px; color: var(--txt3); }
+  .list-box { border: 1px solid var(--border); border-radius: 8px; background: var(--bg); padding: 6px; overflow-y: auto; flex: 1; min-height: 120px; }
+  .pick-item { background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; font-family: Consolas, monospace; font-size: 12px; cursor: pointer; word-break: break-word; }
+  .pick-item:hover { border-color: var(--acc); }
+  .pick-item.on { border-color: var(--purp); background: var(--purp-dim); }
+  .stat { font-size: 12px; color: var(--txt); line-height: 1.8; }
+  input[type=range] { accent-color: var(--acc); }
 
-  /* Random modal */
-  #rnd-modal { width: min(800px, 100%); height: min(680px, 92vh); }
-  .rnd-ctrl {
-    background: var(--surf2); border: 1px solid var(--border);
-    border-radius: 10px; display: flex; align-items: flex-end;
-    padding: 8px 14px 12px; margin: 10px 18px; flex-wrap: wrap; gap: 12px;
+  /* Editor mit Syntax-Hervorhebung */
+  .hl-wrap { position: relative; border: 1px solid var(--bord-h); border-radius: 10px; background: var(--surf2); overflow: hidden; }
+  .hl-wrap:focus-within { border-color: var(--acc); }
+  .hl-back, .hl-ta {
+    font-family: Consolas, monospace; font-size: 13px; line-height: 1.5; padding: 10px 12px;
+    white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; margin: 0;
   }
-  .rnd-ctrl label { font-size: 10px; color: var(--txt2); display: block; margin-bottom: 4px; }
-  .rnd-ctrl select {
-    background: var(--surf3); border: 1px solid var(--bord-h);
-    border-radius: 8px; color: var(--txt); font-size: 13px;
-    padding: 0 10px; height: 34px; width: 180px; outline: none; cursor: pointer;
+  .hl-back { position: absolute; inset: 0; color: var(--txt); pointer-events: none; overflow: hidden; }
+  .hl-ta {
+    position: relative; width: 100%; background: transparent; color: transparent; caret-color: var(--txt);
+    border: none; outline: none; resize: vertical; display: block; min-height: 120px;
   }
-  .rnd-ctrl input[type=number] {
-    background: var(--surf3); border: 1px solid var(--bord-h);
-    border-radius: 8px; color: var(--cyan); font-size: 14px; font-weight: bold;
-    text-align: center; height: 34px; width: 65px; outline: none; padding: 0;
-  }
-  .rnd-ctrl input[type=number]::-webkit-inner-spin-button { display: none; }
-  #rnd-info { font-size: 10px; color: var(--txt2); text-align: center; margin: 0 18px 2px; min-height: 16px; }
-  #rnd-results { flex: 1; overflow-y: auto; margin: 0 18px 8px; padding-right: 4px; }
-  #rnd-results::-webkit-scrollbar { width: 5px; }
-  #rnd-results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  #rnd-footer {
-    background: var(--surf2); display: flex; justify-content: flex-end;
-    align-items: center; gap: 8px; padding: 8px 16px; flex-shrink: 0;
-  }
+  .hl-ta::selection { background: var(--acc-mid); }
+  .hl-w { color: var(--acc); } .hl-e { color: var(--gold); } .hl-d { color: var(--txt2); }
+  .hl-x { color: var(--purp); } .hl-l { color: var(--green); } .hl-b { color: var(--red); font-weight: bold; }
+  .counter { font-size: 9px; color: var(--txt2); text-align: right; }
+  .counter.warn { color: var(--red); }
 
-  /* Editor modal */
-  #editor-modal { width: min(680px, 100%); }
-  #editor-hint { font-size: 10px; color: var(--txt2); padding: 8px 18px 0; }
-  #editor-hint:empty { display: none; }
-
-  /* Name modal (new/rename category) */
-  #name-modal { width: min(420px, 100%); }
-  #name-modal input {
-    background: var(--surf2); border: 1px solid var(--bord-h);
-    border-radius: 10px; color: var(--txt); font-size: 13px;
-    height: 36px; padding: 0 12px; margin: 14px 18px 8px; outline: none;
+  /* Pop menu */
+  #pop-menu {
+    position: fixed; z-index: 300; display: none; min-width: 180px; max-height: 60vh; overflow-y: auto;
+    background: var(--surf2); border: 1px solid var(--bord-h); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
-  #name-modal input:focus { border-color: var(--cyan); }
-
-  /* Pick + History modals */
-  #pick-modal, #hist-modal { width: min(680px, 100%); height: min(600px, 92vh); }
-  #pick-search {
-    background: var(--surf2); border: 1px solid var(--bord-h);
-    border-radius: 10px; color: var(--txt); font-size: 12px;
-    height: 34px; padding: 0 12px; margin: 12px 18px 4px; outline: none;
-  }
-  #pick-search:focus { border-color: var(--cyan); }
-  #pick-list, #hist-list { flex: 1; overflow-y: auto; margin: 8px 18px; }
-  #pick-list::-webkit-scrollbar, #hist-list::-webkit-scrollbar { width: 5px; }
-  #pick-list::-webkit-scrollbar-thumb, #hist-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  .pick-item {
-    background: var(--surf2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px 10px; margin-bottom: 6px; font-family: Consolas, monospace;
-    font-size: 12px; cursor: pointer; word-break: break-word; transition: border-color 0.15s;
-  }
-  .pick-item:hover { border-color: var(--cyan); }
-
-  /* New category button */
-  #new-cat-wrap { padding: 8px 10px 0; }
-  #new-cat-btn {
-    width: 100%; height: 32px; border-radius: 8px;
-    border: 1px solid var(--cyan-mid); background: transparent;
-    color: var(--cyan); font-size: 11px; cursor: pointer;
-    transition: background 0.15s;
-  }
-  #new-cat-btn:hover { background: var(--cyan-dim); }
-
-  /* Category context menu + generic pop menu */
-  #ctx-menu, #pop-menu {
-    position: fixed; z-index: 300; display: none; min-width: 170px;
-    background: var(--surf2); border: 1px solid var(--bord-h);
-    border-radius: 8px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-  }
-  #pop-menu { max-height: 60vh; overflow-y: auto; }
-  #ctx-menu.show, #pop-menu.show { display: block; }
-  #ctx-menu button, #pop-menu button {
-    display: block; width: 100%; text-align: left;
-    background: transparent; border: none; color: var(--txt);
-    font-size: 12px; padding: 9px 14px; cursor: pointer;
-  }
-  #ctx-menu button:hover, #pop-menu button:hover { background: var(--surf3); color: var(--cyan); }
-  #ctx-menu button.danger:hover, #pop-menu button.danger:hover { background: var(--red-dim); color: var(--red); }
+  #pop-menu.show { display: block; }
+  #pop-menu button { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--txt); font-size: 12px; padding: 9px 14px; cursor: pointer; }
+  #pop-menu button:hover { background: var(--surf3); color: var(--acc); }
+  #pop-menu button.danger:hover { background: var(--red-dim); color: var(--red); }
+  #pop-menu button:disabled { color: var(--txt3); cursor: default; }
   .pop-title { font-size: 9px; font-weight: bold; color: var(--txt2); padding: 8px 14px 4px; letter-spacing: 1px; }
   .pop-sep { height: 1px; background: var(--border); margin: 4px 0; }
 
-  /* Toast */
   #toast {
-    position: fixed; bottom: 28px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--cyan-mid); border: 1px solid var(--cyan);
-    color: var(--cyan); font-size: 12px; padding: 8px 20px;
-    border-radius: 20px; opacity: 0;
-    transition: opacity 0.2s, transform 0.2s;
-    pointer-events: none; z-index: 200;
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--acc-mid); border: 1px solid var(--acc); color: var(--acc); font-size: 12px;
+    padding: 8px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none; z-index: 400;
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ══════════════════════════════════════════
-     MOBILE  (≤ 700px)
-  ══════════════════════════════════════════ */
-  #mob-header { display: none; }
-  #mob-tabs   { display: none; }
-  #mob-cats   { display: none; }
+  kbd { font-family: Consolas, monospace; font-size: 11px; background: var(--surf2); border: 1px solid var(--bord-h); border-radius: 4px; padding: 2px 6px; color: var(--acc); }
+  table.t { border-collapse: collapse; width: 100%; font-size: 12px; }
+  table.t td { padding: 4px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
 
-  @media (max-width: 700px) {
-    body { flex-direction: column; overflow: hidden; }
-
-    /* hide desktop sidebar */
+  /* ══ MOBILE ══ */
+  #mob-header, #mob-tabs, #mob-cats { display: none; }
+  @media (max-width: 760px) {
+    body { flex-direction: column; }
     #sidebar { display: none; }
-
-    /* mobile header bar */
-    #mob-header {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--surf); border-bottom: 1px solid var(--border);
-      padding: 10px 14px; flex-shrink: 0;
-    }
+    #mob-header { display: flex; align-items: center; justify-content: space-between; background: var(--surf); border-bottom: 1px solid var(--border); padding: 10px 14px; flex-shrink: 0; }
     #mob-header .logo-line { font-size: 15px; font-weight: bold; }
-    #mob-header .logo-line span:first-child { color: var(--cyan); }
+    #mob-header .logo-line span:first-child { color: var(--acc); }
     #mob-header .logo-line span:last-child  { color: var(--purp); }
     #mob-header .mob-io { display: flex; gap: 6px; }
-    #mob-header .mob-io button {
-      height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--bord-h);
-      background: transparent; color: var(--txt2); font-size: 11px; cursor: pointer;
-    }
-    #mob-header .mob-io .btn-exp { border-color: var(--cyan-mid); color: var(--cyan); }
-
-    /* view tabs (Library / Builder) */
-    #mob-tabs {
-      display: flex; gap: 6px; padding: 8px 10px 0;
-      background: var(--surf); flex-shrink: 0;
-    }
-
-    /* horizontal category tabs */
-    #mob-cats {
-      display: flex; overflow-x: auto; gap: 6px;
-      padding: 8px 10px; background: var(--surf);
-      border-bottom: 1px solid var(--border); flex-shrink: 0;
-    }
+    #mob-header .mob-io button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--bord-h); background: transparent; color: var(--txt2); font-size: 11px; cursor: pointer; }
+    #mob-tabs { display: flex; gap: 6px; padding: 8px 10px 0; background: var(--surf); flex-shrink: 0; }
+    #mob-cats { display: flex; overflow-x: auto; gap: 6px; padding: 8px 10px; background: var(--surf); border-bottom: 1px solid var(--border); flex-shrink: 0; }
     #mob-cats::-webkit-scrollbar { display: none; }
-    .mob-cat {
-      white-space: nowrap; padding: 5px 14px; border-radius: 20px;
-      border: 1px solid var(--border); background: var(--surf2);
-      color: var(--txt2); font-size: 12px; cursor: pointer;
-      flex-shrink: 0; transition: all 0.15s;
-    }
-    .mob-cat.selected {
-      background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan);
-    }
-
-    /* topbar stacks */
-    #topbar, #b-topbar {
-      padding: 10px 12px; gap: 8px; min-height: unset;
-    }
-    #top-left, #top-left-b { display: none; }
-    #top-right, #b-right { width: 100%; justify-content: flex-end; }
+    .mob-cat { white-space: nowrap; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--surf2); color: var(--txt2); font-size: 12px; cursor: pointer; flex-shrink: 0; }
+    .mob-cat.selected { background: var(--acc-dim); border-color: var(--acc); color: var(--acc); }
+    .topbar { padding: 10px 12px; }
+    .top-left { display: none; }
+    .top-right { width: 100%; justify-content: flex-end; }
     input#search { flex: 1; min-width: 0; width: auto; }
-
     .btn { font-size: 12px; padding: 0 12px; }
-
-    /* cards: bigger touch targets */
-    .card-header { padding: 10px 12px 6px; }
-    .btn-ghost, .btn-ghost-purp, .btn-danger { height: 30px; font-size: 11px; padding: 0 10px; }
-
-    /* modals full-screen on mobile */
-    .overlay { padding: 0; align-items: flex-end; }
-    .modal { border-radius: 14px 14px 0 0; max-height: 90vh; width: 100%; }
-    #rnd-modal { height: 90vh; width: 100%; }
-    #editor-modal { width: 100%; }
-    .rnd-ctrl select { width: 140px; }
+    #modal-root { padding: 0; align-items: flex-end; }
+    .modal { border-radius: 14px 14px 0 0; max-height: 92vh; width: 100%; }
+    .form-row { flex-wrap: wrap; } .form-row .k { width: 100%; }
   }
 </style>
 </head>
 <body>
 
-<!-- ── MOBILE HEADER ── -->
 <div id="mob-header">
   <div class="logo-line"><span>PROMPT</span><span>VAULT</span></div>
   <div class="mob-io">
-    <button onclick="importJSON()">&#8593; Import</button>
-    <button class="btn-exp" onclick="exportJSON()">&#8595; Export</button>
+    <button onclick="importFile()">Import</button>
+    <button onclick="openExportMenu(event)">Export</button>
+    <button onclick="openSettings()">⚙</button>
   </div>
 </div>
-
-<!-- ── MOBILE VIEW TABS ── -->
 <div id="mob-tabs">
   <button class="view-tab active" data-view="library" onclick="switchView('library')">Library</button>
   <button class="view-tab" data-view="builder" onclick="switchView('builder')">Builder</button>
 </div>
-
-<!-- ── MOBILE CATEGORY TABS ── -->
 <div id="mob-cats"></div>
 
-<!-- ── SIDEBAR (desktop) ── -->
 <aside id="sidebar">
   <div id="logo">
     <div class="logo-line"><span>PROMPT</span><span>VAULT</span></div>
     <div class="logo-sub">Image Generation</div>
+    <div class="icons">
+      <button class="icon-btn" title="Settings (Ctrl+,)" onclick="openSettings()">⚙</button>
+      <button class="icon-btn" title="Shortcuts (F1)" onclick="openShortcuts()" style="font-size:12px;font-weight:bold;">?</button>
+    </div>
   </div>
   <div id="view-tabs">
     <button class="view-tab active" data-view="library" onclick="switchView('library')">Library</button>
     <button class="view-tab" data-view="builder" onclick="switchView('builder')">Builder</button>
   </div>
-  <div id="cat-label">CATEGORIES</div>
+  <div id="cat-head">
+    <span id="cat-label">CATEGORIES</span>
+    <button class="icon-btn" title="Statistics" onclick="openStats()" style="font-size:11px;">Σ</button>
+    <button class="icon-btn" title="Sort categories" onclick="openCatSortMenu(event)" style="font-size:12px;">⇅</button>
+  </div>
   <div id="cat-list"></div>
-  <div id="new-cat-wrap">
-    <button id="new-cat-btn" onclick="newCategory()">+ New Category</button>
+  <div id="sidebar-tools">
+    <button title="Trash (Ctrl+T)" onclick="openTrash()">🗑</button>
+    <button title="Find duplicates (Ctrl+D)" onclick="openDuplicates()">⧉</button>
+    <button title="Backups" onclick="openBackups()">⟲</button>
   </div>
   <div id="sidebar-footer">
-    <button onclick="importJSON()">&#8593; Import</button>
-    <button class="btn-exp" onclick="exportJSON()">&#8595; Export</button>
+    <button onclick="importFile()">Import</button>
+    <button onclick="openExportMenu(event)">Export</button>
   </div>
-  <div id="privacy-wrap">
-    <a id="privacy-link" href="privacy.html">Privacy Policy</a>
-  </div>
+  <div id="new-cat-wrap"><button id="new-cat-btn" onclick="newCategory()">+ New Category</button></div>
+  <div id="privacy-wrap"><a id="privacy-link" href="privacy.html">Privacy Policy</a></div>
 </aside>
 
-<!-- ── CONTENT ── -->
 <main id="content">
-
-  <!-- Library view -->
   <div id="lib-view">
-    <div id="topbar">
-      <div id="top-left">
-        <div id="title-lbl">Select a category</div>
-        <div id="count-lbl"></div>
+    <div class="topbar">
+      <div class="top-left">
+        <div class="top-title" id="title-lbl">Select a category</div>
+        <div class="top-sub" id="count-lbl"></div>
       </div>
-      <div id="top-right">
-        <label id="all-wrap"><input type="checkbox" id="all-chk" onchange="renderPrompts()">All</label>
-        <button class="btn btn-ghost" id="fav-btn" title="Show favorites only" onclick="toggleFavFilter()" style="font-size:15px;width:38px;padding:0;height:34px;border-radius:10px;">&#9734;</button>
-        <input id="search" type="text" placeholder="  Search...">
-        <button class="btn btn-purp" id="rnd-btn" disabled onclick="openRandom()">&#9733; Random</button>
-        <button class="btn btn-cyan" id="add-btn" disabled onclick="openEditor()">+ Prompt</button>
-        <button class="btn btn-cyan" id="batch-btn" disabled onclick="openBatch()">+ Batch</button>
+      <div class="top-right">
+        <select class="sel" id="sort-sel" onchange="onSortChange()">
+          <option value="manual">Manual</option><option value="alpha">A → Z</option>
+          <option value="used">Most used</option><option value="recent">Recently used</option>
+          <option value="newest">Newest</option><option value="longest">Longest</option>
+        </select>
+        <button class="btn btn-ghost tall" id="fav-btn" title="Favorites only" onclick="toggleFavFilter()" style="font-size:15px;width:38px;padding:0;">☆</button>
+        <label class="chk"><input type="checkbox" id="all-chk" onchange="renderPrompts()">All</label>
+        <input class="inp" id="search" type="text" placeholder="Search…  (tag:name)">
+        <button class="btn btn-purp" id="rnd-btn" disabled onclick="openRandom()">Random</button>
+        <button class="btn btn-acc" id="add-btn" disabled onclick="addPrompt()">+ Prompt</button>
+        <button class="btn btn-acc" id="batch-btn" disabled onclick="addBatch()">+ Batch</button>
       </div>
     </div>
-    <div id="list-wrap">
-      <p class="empty-msg">&#8592; Select a category on the left</p>
-    </div>
+    <div id="tag-bar"></div>
+    <div id="bulk-bar" class="hidden"></div>
+    <div id="list-wrap"><p class="empty-msg">← Select a category on the left</p></div>
   </div>
 
-  <!-- Builder view -->
   <div id="builder-view" class="hidden">
-    <div id="b-topbar">
-      <div id="top-left-b">
-        <div id="b-title">Builder</div>
-        <div id="b-sub">Combine random prompts from your categories</div>
+    <div class="topbar">
+      <div class="top-left">
+        <div class="top-title">Builder</div>
+        <div class="top-sub" id="slot-count-lbl">0 Slots</div>
       </div>
-      <div id="b-right">
-        <button class="btn btn-ghost" style="height:34px;border-radius:10px;" onclick="openHistory()">History</button>
-        <button class="btn btn-ghost" style="height:34px;border-radius:10px;" onclick="openTplMenu(event)">Templates &#9662;</button>
-        <button class="btn btn-cyan" onclick="openAddSlotMenu(event)">+ Slot</button>
-        <button class="btn btn-purp" id="roll-btn" onclick="randomizeAll()">&#127922; Randomize</button>
+      <div class="top-right">
+        <button class="btn btn-ghost tall" onclick="openHistory()">History</button>
+        <button class="btn btn-ghost tall" onclick="openTplMenu(event)">Templates ▾</button>
+        <button class="btn btn-ghost tall" onclick="openRules()">Rules</button>
+        <button class="btn btn-ghost tall" onclick="openBatchGenerate()">Batch ×N</button>
+        <button class="btn btn-acc" onclick="openAddSlotMenu(event)">+ Slot</button>
+        <button class="btn btn-purp" id="roll-btn" onclick="randomizeAll()">🎲 Randomize</button>
       </div>
     </div>
     <div id="slot-wrap"></div>
     <div id="result-bar">
-      <div id="result-text" class="empty">Add slots and press Randomize...</div>
+      <div id="result-head">
+        <span class="bar-label">RESULT</span><span id="tok-lbl"></span><span id="tpl-lbl"></span>
+      </div>
+      <div id="result-text" class="empty">Add slots and press Randomize…</div>
+      <div id="neg-wrap" class="hidden"><span class="lbl">NEGATIVE</span><div id="neg-text"></div><button class="btn btn-ghost" onclick="copyNegative()">Copy</button></div>
       <div id="result-row">
         <span class="sep-lbl">Separator</span>
-        <input id="sep-input" value=", " oninput="updateResult()">
+        <input class="inp" id="sep-input" value=", " oninput="onSepChange()">
+        <label class="chk"><input type="checkbox" id="wild-chk" onchange="updateResult()">Wildcard syntax</label>
         <span style="flex:1"></span>
-        <button class="btn btn-gold" id="save-res-btn" disabled onclick="openSaveResultMenu(event)">&#9733; Save</button>
-        <button class="btn btn-cyan" id="copy-res-btn" disabled onclick="copyResult()">Copy</button>
+        <button class="btn btn-gold" id="save-res-btn" disabled onclick="openSaveResultMenu(event)">★ Save</button>
+        <button class="btn btn-acc" id="copy-res-btn" disabled onclick="copyResult()">Copy</button>
       </div>
     </div>
   </div>
-
 </main>
 
-<!-- ── EDITOR OVERLAY ── -->
-<div class="overlay hidden" id="editor-overlay" onclick="editorOverlayClick(event)">
-  <div class="modal" id="editor-modal">
-    <div class="modal-header" id="editor-title">Add Prompt</div>
-    <div id="editor-hint"></div>
-    <textarea id="editor-ta" placeholder="Enter your prompt here..."></textarea>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeEditor()">Cancel</button>
-      <button class="btn btn-cyan"  onclick="saveEditor()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── RANDOM OVERLAY ── -->
-<div class="overlay hidden" id="rnd-overlay" onclick="rndOverlayClick(event)">
-  <div class="modal" id="rnd-modal" style="display:flex;flex-direction:column;">
-    <div class="modal-header" style="color:var(--purp)">&#9733; Random Prompts</div>
-    <div class="rnd-ctrl">
-      <div>
-        <label>Category</label>
-        <select id="rnd-cat"></select>
-      </div>
-      <div>
-        <label>Count</label>
-        <input type="number" id="rnd-count" value="10" min="1">
-      </div>
-      <div style="display:flex;align-items:flex-end;">
-        <button class="btn btn-purp" onclick="generateRandom()" style="height:34px;font-size:12px;">Generate</button>
-      </div>
-    </div>
-    <div id="rnd-info"></div>
-    <div id="rnd-results"></div>
-    <div id="rnd-footer">
-      <button class="btn btn-cyan" id="copy-all-btn" disabled onclick="copyAll()" style="font-size:12px;height:34px;">Copy All</button>
-      <button class="btn btn-ghost" onclick="closeRandom()" style="font-size:12px;height:34px;border-radius:10px;">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── NAME OVERLAY (new / rename category) ── -->
-<div class="overlay hidden" id="name-overlay" onclick="nameOverlayClick(event)">
-  <div class="modal" id="name-modal">
-    <div class="modal-header" id="name-title">New Category</div>
-    <input type="text" id="name-input" placeholder="Category name...">
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeNameModal()">Cancel</button>
-      <button class="btn btn-cyan"  onclick="saveNameModal()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── CATEGORY CONTEXT MENU ── -->
-<div id="ctx-menu">
-  <button onclick="ctxRename()">Rename</button>
-  <button class="danger" onclick="ctxDelete()">Delete</button>
-</div>
-
-<!-- ── GENERIC POP MENU ── -->
+<div id="modal-root"></div>
 <div id="pop-menu"></div>
-
-<!-- ── PICK OVERLAY (Builder: manuell wählen) ── -->
-<div class="overlay hidden" id="pick-overlay" onclick="if(event.target===this)closePick()">
-  <div class="modal" id="pick-modal" style="display:flex;flex-direction:column;">
-    <div class="modal-header" id="pick-title" style="color:var(--purp)">Pick Prompt</div>
-    <input type="text" id="pick-search" placeholder="Search..." oninput="renderPickList()">
-    <div id="pick-list"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closePick()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── HISTORY OVERLAY (Builder) ── -->
-<div class="overlay hidden" id="hist-overlay" onclick="if(event.target===this)closeHistory()">
-  <div class="modal" id="hist-modal" style="display:flex;flex-direction:column;">
-    <div class="modal-header">History &#8212; last results</div>
-    <div id="hist-list"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeHistory()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── HIDDEN FILE INPUT FOR IMPORT ── -->
-<input type="file" id="file-input" accept=".json" style="display:none" onchange="handleImport(event)">
-
-<!-- ── TOAST ── -->
+<input type="file" id="file-input" accept=".json,.txt,.csv" style="display:none" onchange="handleImport(event)">
 <div id="toast">Copied!</div>
 
 <script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════
+   PromptVault web — single file, offline, localStorage only.
+   Data format is identical to the desktop app (version 2), so exports
+   can be moved between both.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const KEYS = {
+  data: "promptvault_v2", settings: "promptvault_settings", templates: "promptvault_templates_v2",
+  state: "promptvault_builder_state", history: "promptvault_history", trash: "promptvault_trash",
+  backups: "promptvault_backups",
+  // Version 1 (bleibt als Sicherheitskopie liegen)
+  legacyData: "promptvault_data", legacyFavs: "promptvault_favs", legacyTpl: "promptvault_templates",
+};
 const DEFAULT_CATEGORIES = ["Clothing", "Hairstyle", "Environment", "Appearance", "Position", "Character"];
-const STORAGE_KEY = "promptvault_data";
-const BACKUP_KEY  = "promptvault_data_backup";
+const DEFAULT_SETTINGS = {
+  theme: "dark", accent: "cyan", fontScale: 1.0, defaultSep: ", ", randomCount: 10,
+  confirmDelete: true, catSort: "manual", promptSort: "manual", backupsKeep: 3,
+  backupIntervalMin: 10, historyKeep: 100, trashKeep: 200,
+};
+const ACCENTS = { cyan: "#00d4ff", green: "#22c55e", pink: "#f472b6", orange: "#fb923c", blue: "#60a5fa", gold: "#fbbf24" };
+const ACCENTS_LIGHT = { cyan: "#0284c7", green: "#15803d", pink: "#be185d", orange: "#c2410c", blue: "#1d4ed8", gold: "#b45309" };
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const d = JSON.parse(raw);
-      if (d && typeof d === "object" && !Array.isArray(d)) return d;
-    }
-  } catch {}
-  const d = {};
-  DEFAULT_CATEGORIES.forEach(c => d[c] = []);
-  return d;
+// ── Helfer ──────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const nowIso = () => new Date().toISOString().slice(0, 19);
+const fmtTs = ts => ts ? ts.replace("T", " ").slice(0, 16) : "—";
+function uid() {
+  const a = new Uint8Array(6); crypto.getRandomValues(a);
+  return [...a].map(b => b.toString(16).padStart(2, "0")).join("");
 }
-
-function saveData(data) {
-  // Sicherheitskopie der letzten Version, dann speichern
-  const cur = localStorage.getItem(STORAGE_KEY);
-  if (cur !== null) localStorage.setItem(BACKUP_KEY, cur);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function escHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function plural(n, w) { return `${n} ${w}${n !== 1 ? "s" : ""}`; }
+function readJSON(key, fallback) {
+  try { const v = localStorage.getItem(key); if (v == null) return fallback; return JSON.parse(v); } catch { return fallback; }
 }
-
-function cats() { return Object.keys(data); }
-
+function writeJSON(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); return true; }
+  catch (e) {
+    // Speicher voll: Backups opfern, dann noch einmal versuchen
+    try { localStorage.removeItem(KEYS.backups); localStorage.setItem(key, JSON.stringify(val)); showToast("Storage nearly full — backups dropped"); return true; }
+    catch { showToast("Storage full! Export your data now."); return false; }
+  }
+}
+function normalizeTags(tags) {
+  if (typeof tags === "string") tags = tags.split(/[,\n;]+/);
+  const out = [];
+  for (let t of tags || []) { t = String(t).trim().toLowerCase().replace(/^#/, ""); if (t && !out.includes(t)) out.push(t); }
+  return out;
+}
+function makePrompt(text, extra = {}) {
+  return Object.assign({ id: uid(), text: String(text).trim(), title: "", tags: [], note: "", weight: 5, fav: false,
+    uses: 0, last_used: null, created: nowIso(), variants: [], image: null }, extra, { tags: normalizeTags(extra.tags || []) });
+}
+function normalizePrompt(p) {
+  if (typeof p === "string") return makePrompt(p);
+  const base = makePrompt(String(p.text || ""));
+  for (const k of Object.keys(base)) if (p[k] != null) base[k] = p[k];
+  if (!base.id) base.id = uid();
+  base.tags = normalizeTags(base.tags);
+  base.variants = (base.variants || []).filter(v => typeof v === "string" && v.trim());
+  base.weight = Math.max(1, Math.min(10, parseInt(base.weight) || 5));
+  base.uses = parseInt(base.uses) || 0;
+  return base;
+}
+const promptTexts = p => [p.text, ...(p.variants || []).filter(Boolean)];
 function splitBatch(text) {
   const marker = /(?:^|[\s,;])\s*\d{1,3}\s*[.:)]\s+/;
-  if (marker.test("\n" + text)) {
-    return ("\n" + text).split(new RegExp(marker.source, "g"))
-      .map(p => p.trim().replace(/^[,;]+|[,;]+$/g, "").trim())
-      .filter(Boolean);
-  }
+  if (marker.test("\n" + text))
+    return ("\n" + text).split(new RegExp(marker.source, "g")).map(p => p.trim().replace(/^[,;]+|[,;]+$/g, "").trim()).filter(Boolean);
   return text.split("\n").map(l => l.trim()).filter(Boolean);
 }
+function estimateTokens(text) {
+  let n = 0;
+  for (const m of text.matchAll(/[A-Za-z]+|\d|[^\sA-Za-z\d]/g)) {
+    const w = m[0];
+    n += /^[A-Za-z]+$/.test(w) ? 1 + Math.max(0, Math.floor((w.length - 7) / 4)) : 1;
+  }
+  return n;
+}
+function splitTerms(s) { return (s || "").replace(/;/g, ",").split(",").map(t => t.trim()).filter(Boolean); }
+function termsMatch(text, tags, terms) {
+  const low = text.toLowerCase();
+  return terms.some(t => { t = t.trim().toLowerCase(); return t && (low.includes(t) || tags.includes(t)); });
+}
+function downloadText(name, text, mime = "text/plain") {
+  const blob = new Blob([text], { type: mime + ";charset=utf-8" });
+  const url = URL.createObjectURL(blob); const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+const safeName = s => s.replace(/[^A-Za-z0-9_\-]+/g, "_").replace(/^_+|_+$/g, "") || "category";
 
+// ── Zustand ─────────────────────────────────────────────────────────
+let settings = Object.assign({}, DEFAULT_SETTINGS, readJSON(KEYS.settings, {}));
 let data = loadData();
+let templates = loadTemplates();
+let history = (readJSON(KEYS.history, []) || []).filter(e => e && e.text);
+let trash = readJSON(KEYS.trash, []) || [];
 let selected = null;
-let editIndex = null;
-let editCat = null;
-let batchMode = false;
-let editorCallback = null;   // Editor-Modal als generischer Texteditor (Builder-Textslots)
-let lastRndResults = [];
-
-// ── Favoriten ─────────────────────────────────────────────────────────────────
-
-const FAVS_KEY = "promptvault_favs";
-const TPL_KEY  = "promptvault_templates";
-
-function loadJSON(key, fallback) {
-  try {
-    const v = JSON.parse(localStorage.getItem(key));
-    if (v && typeof v === "object" && !Array.isArray(v)) return v;
-  } catch {}
-  return fallback;
-}
-
-let favs = loadJSON(FAVS_KEY, {});
-
-function saveFavs() {
-  for (const k of Object.keys(favs)) if (!favs[k] || !favs[k].length) delete favs[k];
-  localStorage.setItem(FAVS_KEY, JSON.stringify(favs));
-}
-
-function isFav(cat, p) { return (favs[cat] || []).includes(p); }
-
-function toggleFav(cat, p) {
-  const l = favs[cat] || (favs[cat] = []);
-  const i = l.indexOf(p);
-  if (i >= 0) l.splice(i, 1); else l.push(p);
-  saveFavs();
-  renderPrompts();
-}
-
-let favFilter = false;
-
-function toggleFavFilter() {
-  favFilter = !favFilter;
-  const b = document.getElementById("fav-btn");
-  b.innerHTML = favFilter ? "&#9733;" : "&#9734;";
-  b.classList.toggle("fav-on", favFilter);
-  renderPrompts();
-}
-
-// ── Undo ──────────────────────────────────────────────────────────────────────
-
-let undoStack = [];   // ["prompt", cat, index, text, wasFav] | ["category", name, prompts, favList, pos]
-
-function pushUndo(entry) {
-  undoStack.push(entry);
-  if (undoStack.length > 20) undoStack.shift();
-}
-
-function undo() {
-  const e = undoStack.pop();
-  if (!e) { showToast("Nothing to undo"); return; }
-  if (e[0] === "prompt") {
-    const [, cat, index, text, wasFav] = e;
-    if (!Array.isArray(data[cat])) data[cat] = [];
-    data[cat].splice(Math.min(index, data[cat].length), 0, text);
-    if (wasFav && !isFav(cat, text)) { (favs[cat] || (favs[cat] = [])).push(text); saveFavs(); }
-    saveData(data);
-    refresh();
-    showToast("Prompt restored");
-  } else {
-    const [, name, prompts, favList, pos] = e;
-    if (name in data) { showToast(`Category "${name}" already exists`); return; }
-    const entries = Object.entries(data);
-    entries.splice(Math.min(pos, entries.length), 0, [name, prompts]);
-    data = Object.fromEntries(entries);
-    if (favList.length) { favs[name] = favList; saveFavs(); }
-    saveData(data);
-    selectCat(name);
-    showToast(`Category "${name}" restored`);
-  }
-}
-
-// ── Builder-Status ────────────────────────────────────────────────────────────
-
-let slots = [];        // {type:"cat"|"text", cat, text, value, locked, weight}
-let histArr = [];      // letzte Ergebnisse (nur im Speicher, max. 20)
 let activeView = "library";
-let templates = loadJSON(TPL_KEY, {});
+let favFilter = false;
+let tagFilter = new Set();
+let selection = new Set();
+let undoStack = [];
+let lastBackup = 0;
+let slots = [], rules = [], activeTemplate = null;
+let visibleCache = [];
 
-function saveTemplates() { localStorage.setItem(TPL_KEY, JSON.stringify(templates)); }
+const cats = () => Object.keys(data);
 
-// ── Sidebar + Mobile tabs ─────────────────────────────────────────────────────
-
-function attachCatMenu(el, cat) {
-  el.addEventListener("contextmenu", e => {
-    e.preventDefault();
-    openCtxMenu(e.clientX, e.clientY, cat);
-  });
-  // Long-press für Touch-Geräte
-  let pressTimer = null;
-  el.addEventListener("touchstart", e => {
-    const t = e.touches[0];
-    pressTimer = setTimeout(() => {
-      ignoreNextClick = true;
-      openCtxMenu(t.clientX, t.clientY, cat);
-    }, 600);
-  }, { passive: true });
-  ["touchend", "touchmove", "touchcancel"].forEach(ev =>
-    el.addEventListener(ev, () => clearTimeout(pressTimer), { passive: true }));
-}
-
-function renderSidebar() {
-  // Desktop sidebar
-  const list = document.getElementById("cat-list");
-  list.innerHTML = "";
-  for (const cat of cats()) {
-    const count = (data[cat] || []).length;
-    const sel = cat === selected;
-    const row = document.createElement("div");
-    row.className = "cat-row" + (sel ? " selected" : "");
-    row.innerHTML = `
-      <div class="cat-bar"></div>
-      <div class="cat-name">${escHtml(cat)}</div>
-      <div class="cat-badge">${count}</div>`;
-    row.onclick = () => selectCat(cat);
-    attachCatMenu(row, cat);
-    list.appendChild(row);
+// ── Laden / Migrieren / Speichern ───────────────────────────────────
+function loadData() {
+  const v2 = readJSON(KEYS.data, null);
+  if (v2 && v2.version === 2 && v2.categories && typeof v2.categories === "object") {
+    const out = {};
+    for (const [c, lst] of Object.entries(v2.categories)) out[c] = (Array.isArray(lst) ? lst : []).map(normalizePrompt);
+    return out;
   }
-
-  // Mobile tabs
-  const tabs = document.getElementById("mob-cats");
-  tabs.innerHTML = "";
-  for (const cat of cats()) {
-    const tab = document.createElement("div");
-    tab.className = "mob-cat" + (cat === selected ? " selected" : "");
-    tab.textContent = cat;
-    tab.onclick = () => selectCat(cat);
-    attachCatMenu(tab, cat);
-    tabs.appendChild(tab);
-  }
-  const plus = document.createElement("div");
-  plus.className = "mob-cat";
-  plus.textContent = "+";
-  plus.onclick = newCategory;
-  tabs.appendChild(plus);
-}
-
-function selectCat(cat) {
-  selected = cat;
-  switchView("library");
-  document.getElementById("search").value = "";
-  if (!cat) {
-    document.getElementById("title-lbl").textContent = "Select a category";
-    document.getElementById("count-lbl").textContent = "";
-    document.getElementById("add-btn").disabled = true;
-    document.getElementById("batch-btn").disabled = true;
-    document.getElementById("rnd-btn").disabled = true;
-    renderSidebar();
-    renderPrompts();
-    return;
-  }
-  document.getElementById("title-lbl").textContent = cat;
-  const n = (data[cat] || []).length;
-  document.getElementById("count-lbl").textContent = n + " Prompt" + (n !== 1 ? "s" : "");
-  document.getElementById("add-btn").disabled = false;
-  document.getElementById("batch-btn").disabled = false;
-  document.getElementById("rnd-btn").disabled = n === 0;
-  renderSidebar();
-  renderPrompts();
-}
-
-// ── Kategorien: anlegen / umbenennen / löschen ───────────────────────────────
-
-let ctxCat = null;
-let nameMode = null;        // "new" | "rename"
-let ignoreNextClick = false;
-
-function openCtxMenu(x, y, cat) {
-  ctxCat = cat;
-  const m = document.getElementById("ctx-menu");
-  m.classList.add("show");
-  const r = m.getBoundingClientRect();
-  m.style.left = Math.min(x, window.innerWidth  - r.width  - 8) + "px";
-  m.style.top  = Math.min(y, window.innerHeight - r.height - 8) + "px";
-}
-
-function closeCtxMenu() {
-  document.getElementById("ctx-menu").classList.remove("show");
-}
-
-document.addEventListener("click", () => {
-  if (ignoreNextClick) { ignoreNextClick = false; return; }
-  closeCtxMenu();
-  closePopMenu();
-});
-document.addEventListener("scroll", e => {
-  closeCtxMenu();
-  if (!document.getElementById("pop-menu").contains(e.target)) closePopMenu();
-}, true);
-
-// ── Generisches Pop-Menü ──────────────────────────────────────────────────────
-// items: [{label, action, danger?} | {sep:true}]
-
-function openPopMenu(x, y, items, title = null) {
-  const m = document.getElementById("pop-menu");
-  m.innerHTML = "";
-  if (title) {
-    const h = document.createElement("div");
-    h.className = "pop-title";
-    h.textContent = title;
-    m.appendChild(h);
-  }
-  for (const it of items) {
-    if (it.sep) {
-      const s = document.createElement("div");
-      s.className = "pop-sep";
-      m.appendChild(s);
-      continue;
+  const v1 = readJSON(KEYS.legacyData, null);
+  if (v1 && typeof v1 === "object" && !Array.isArray(v1)) {
+    const favs = readJSON(KEYS.legacyFavs, {}) || {};
+    const out = {};
+    for (const [c, lst] of Object.entries(v1)) {
+      if (!Array.isArray(lst)) continue;
+      const f = favs[c] || [];
+      out[c] = lst.filter(p => typeof p === "string" && p.trim()).map(p => makePrompt(p, { fav: f.includes(p) }));
     }
-    const b = document.createElement("button");
-    b.textContent = it.label;
-    if (it.danger) b.className = "danger";
-    b.addEventListener("click", ev => {
-      ev.stopPropagation();
-      closePopMenu();
-      it.action();
-    });
+    writeJSON(KEYS.data, { version: 2, categories: out });
+    return out;
+  }
+  const out = {}; DEFAULT_CATEGORIES.forEach(c => out[c] = []);
+  return out;
+}
+function saveData(backup = true) {
+  if (backup) maybeBackup();
+  writeJSON(KEYS.data, { version: 2, categories: data });
+}
+function maybeBackup(force = false) {
+  const now = Date.now();
+  if (!force && lastBackup && now - lastBackup < settings.backupIntervalMin * 60000) return;
+  const cur = localStorage.getItem(KEYS.data); if (!cur) return;
+  let b = readJSON(KEYS.backups, []) || [];
+  b.unshift({ ts: nowIso(), data: cur });
+  b = b.slice(0, Math.max(1, settings.backupsKeep));
+  try { localStorage.setItem(KEYS.backups, JSON.stringify(b)); lastBackup = now; }
+  catch { b = b.slice(0, 1); try { localStorage.setItem(KEYS.backups, JSON.stringify(b)); } catch {} }
+}
+function listBackups() { return readJSON(KEYS.backups, []) || []; }
+function loadTemplates() {
+  const v2 = readJSON(KEYS.templates, null);
+  if (v2 && typeof v2 === "object") return v2;
+  const old = readJSON(KEYS.legacyTpl, {}) || {};
+  const out = {};
+  for (const [name, val] of Object.entries(old)) {
+    if (!Array.isArray(val)) continue;
+    out[name] = { slots: val.map(e => typeof e === "string" ? { type: "cat", cat: e, weight: 100 } : e), rules: [] };
+  }
+  return out;
+}
+function saveTemplates() { writeJSON(KEYS.templates, templates); }
+function saveSettings() { writeJSON(KEYS.settings, settings); }
+function saveHistory() {
+  const pinned = history.filter(e => e.pinned), rest = history.filter(e => !e.pinned).slice(0, settings.historyKeep);
+  history = [...pinned, ...rest].sort((a, b) => (b.ts || "").localeCompare(a.ts || ""));
+  writeJSON(KEYS.history, history);
+}
+function saveTrash() { trash = trash.slice(0, settings.trashKeep); writeJSON(KEYS.trash, trash); }
+let stateTimer;
+function saveBuilderState() {
+  clearTimeout(stateTimer);
+  stateTimer = setTimeout(() => writeJSON(KEYS.state, { slots, rules, sep: $("sep-input").value, template: activeTemplate, wildcard: $("wild-chk").checked }), 600);
+}
+function restoreBuilderState() {
+  const st = readJSON(KEYS.state, {}) || {};
+  slots = (st.slots || []).filter(s => s && typeof s === "object").map(normalizeSlot);
+  rules = (st.rules || []).filter(r => r && typeof r === "object");
+  activeTemplate = st.template || null;
+  if (st.sep) $("sep-input").value = st.sep;
+  $("wild-chk").checked = !!st.wildcard;
+}
+
+// ── Theme ───────────────────────────────────────────────────────────
+function hexToRgb(h) { h = h.replace("#", ""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function blend(a, b, t) {
+  const A = hexToRgb(a), B = hexToRgb(b);
+  return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
+}
+function applyTheme() {
+  const light = settings.theme === "light";
+  document.documentElement.dataset.theme = light ? "light" : "dark";
+  const acc = (light ? ACCENTS_LIGHT : ACCENTS)[settings.accent] || ACCENTS.cyan;
+  const r = document.documentElement.style;
+  r.setProperty("--acc", acc);
+  r.setProperty("--acc-dim", light ? blend(acc, "#ffffff", 0.85) : blend(acc, "#06060f", 0.82));
+  r.setProperty("--acc-mid", light ? blend(acc, "#ffffff", 0.7) : blend(acc, "#06060f", 0.65));
+  document.body.style.zoom = settings.fontScale || 1;
+}
+
+// ── Pop-Menü / Toast / Copy ─────────────────────────────────────────
+let ignoreNextClick = false;
+function openPopMenu(x, y, items, title = null) {
+  const m = $("pop-menu"); m.innerHTML = "";
+  if (title) m.appendChild(el("div", "pop-title", title));
+  for (const it of items) {
+    if (it.sep) { m.appendChild(el("div", "pop-sep")); continue; }
+    const b = el("button", it.danger ? "danger" : "", it.label);
+    if (it.disabled) b.disabled = true;
+    b.addEventListener("click", ev => { ev.stopPropagation(); closePopMenu(); it.action(); });
     m.appendChild(b);
   }
   m.classList.add("show");
   const r = m.getBoundingClientRect();
-  m.style.left = Math.max(8, Math.min(x, window.innerWidth  - r.width  - 8)) + "px";
-  m.style.top  = Math.max(8, Math.min(y, window.innerHeight - r.height - 8)) + "px";
+  m.style.left = Math.max(8, Math.min(x, innerWidth - r.width - 8)) + "px";
+  m.style.top = Math.max(8, Math.min(y, innerHeight - r.height - 8)) + "px";
   ignoreNextClick = true;
 }
-
-function closePopMenu() {
-  document.getElementById("pop-menu").classList.remove("show");
+function closePopMenu() { $("pop-menu").classList.remove("show"); }
+document.addEventListener("click", () => { if (ignoreNextClick) { ignoreNextClick = false; return; } closePopMenu(); });
+document.addEventListener("scroll", e => { if (!$("pop-menu").contains(e.target)) closePopMenu(); }, true);
+let toastTimer;
+function showToast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2200); }
+function copyText(text, msg = "Copied!") {
+  const done = () => showToast(msg);
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  else fallbackCopy(text, done);
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); } catch {} ta.remove(); done();
 }
 
-function newCategory() {
-  nameMode = "new";
-  openNameModal("New Category", "");
-}
-
-function ctxRename() {
-  nameMode = "rename";
-  openNameModal(`Rename "${ctxCat}"`, ctxCat);
-}
-
-function ctxDelete() {
-  const n = (data[ctxCat] || []).length;
-  if (!confirm(`Delete "${ctxCat}" with ${n} prompt${n !== 1 ? "s" : ""}?`)) return;
-  pushUndo(["category", ctxCat, data[ctxCat] || [], favs[ctxCat] || [], cats().indexOf(ctxCat)]);
-  delete data[ctxCat];
-  delete favs[ctxCat];
-  saveFavs();
-  saveData(data);
-  if (selected === ctxCat) selected = null;
-  selectCat(selected || cats()[0] || null);
-  showToast("Deleted — Ctrl+Z to undo");
-}
-
-function openNameModal(title, initial) {
-  document.getElementById("name-title").textContent = title;
-  const inp = document.getElementById("name-input");
-  inp.value = initial;
-  document.getElementById("name-overlay").classList.remove("hidden");
-  inp.focus();
-}
-
-function closeNameModal() {
-  document.getElementById("name-overlay").classList.add("hidden");
-}
-
-function nameOverlayClick(e) {
-  if (e.target === document.getElementById("name-overlay")) closeNameModal();
-}
-
-function saveNameModal() {
-  const name = document.getElementById("name-input").value.trim();
-  if (!name) return;
-  if (nameMode === "template") {
-    if (name in templates && !confirm(`Overwrite template "${name}"?`)) return;
-    closeNameModal();
-    saveTemplate(name);
-    return;
+// ── Modal-System ────────────────────────────────────────────────────
+let modalClose = null;
+function openModal({ title, hint, width, purp, build, buttons = [], onClose }) {
+  closeModal();
+  const root = $("modal-root"); root.innerHTML = "";
+  const m = el("div", "modal"); if (width) m.style.width = width + "px";
+  const h = el("div", "modal-header");
+  h.appendChild(el("span", "modal-title" + (purp ? " purp" : ""), title));
+  if (hint) h.appendChild(el("span", "modal-hint", hint));
+  const x = el("button", "modal-x", "✕"); x.onclick = () => closeModal(); h.appendChild(x);
+  const body = el("div", "modal-body");
+  const foot = el("div", "modal-footer");
+  m.append(h, body, foot); root.appendChild(m); root.classList.add("show");
+  const close = () => { root.classList.remove("show"); root.innerHTML = ""; modalClose = null; if (onClose) onClose(); };
+  modalClose = close;
+  const api = { body, foot, close, m };
+  for (const b of buttons) {
+    const btn = el("button", "btn " + (b.cls || "btn-acc"), b.label);
+    if (b.left) btn.classList.add("left");
+    btn.onclick = () => b.action(api);
+    foot.appendChild(btn); b.el = btn;
   }
-  if (name in data && !(nameMode === "rename" && name === ctxCat)) {
-    alert(`Category "${name}" already exists.`);
-    return;
-  }
-  closeNameModal();
-  if (nameMode === "new") {
-    data[name] = [];
-    saveData(data);
-    selectCat(name);
-  } else if (nameMode === "rename" && name !== ctxCat) {
-    const renamed = {};
-    for (const k of cats()) renamed[k === ctxCat ? name : k] = data[k];
-    data = renamed;
-    if (favs[ctxCat]) { favs[name] = favs[ctxCat]; delete favs[ctxCat]; saveFavs(); }
-    saveData(data);
-    if (selected === ctxCat) selected = name;
-    selectCat(selected);
-  }
+  if (build) build(api);
+  return api;
 }
+function closeModal() { if (modalClose) modalClose(); }
+$("modal-root").addEventListener("mousedown", e => { if (e.target === $("modal-root")) closeModal(); });
+function modalOpen() { return $("modal-root").classList.contains("show"); }
+function confirmDlg(msg) { return confirm(msg); }
 
-// ── Prompt List ───────────────────────────────────────────────────────────────
-
-function renderPrompts() {
-  const wrap = document.getElementById("list-wrap");
-  wrap.innerHTML = "";
-  const allMode = document.getElementById("all-chk").checked;
-  if (!allMode && !selected) {
-    wrap.innerHTML = '<p class="empty-msg">&#8592; Select a category on the left</p>';
-    return;
-  }
-  const q = document.getElementById("search").value.trim().toLowerCase();
-
-  // (cat, index, prompt)-Tripel sammeln — global oder nur aktuelle Kategorie
-  const filtered = [];
-  for (const cat of (allMode ? cats() : [selected])) {
-    (data[cat] || []).forEach((p, i) => {
-      if (q && !p.toLowerCase().includes(q)) return;
-      if (favFilter && !isFav(cat, p)) return;
-      filtered.push({ cat, i, p });
-    });
-  }
-
-  if (filtered.length === 0) {
-    const raw = document.getElementById("search").value;
-    let msg = "No prompts yet.\nClick  + Prompt  to add one.";
-    if (q) msg = `No results for "${raw}"`;
-    else if (favFilter) msg = "No favorites yet.\nClick ☆ on a prompt to mark it.";
-    wrap.innerHTML = `<p class="empty-msg">${escHtml(msg).replace(/\n/g, "<br>")}</p>`;
-    return;
-  }
-
-  filtered.forEach(({ cat, i, p }, n) => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    const header = document.createElement("div");
-    header.className = "card-header";
-
-    const left = document.createElement("span");
-    left.style.cssText = "display:flex;align-items:center;min-width:0;";
-    const num = document.createElement("span");
-    num.className = "card-num";
-    num.textContent = "#" + String((allMode ? n : i) + 1).padStart(2, "0");
-    left.appendChild(num);
-    if (allMode) {
-      const badge = document.createElement("span");
-      badge.className = "card-cat";
-      badge.textContent = cat;
-      left.appendChild(badge);
-    }
-
-    const btns = document.createElement("div");
-    btns.className = "card-btns";
-    const mk = (label, cls, fn) => {
-      const b = document.createElement("button");
-      b.className = "btn " + cls;
-      b.textContent = label;
-      b.addEventListener("click", fn);
-      btns.appendChild(b);
-      return b;
+// Namensdialog
+function nameDialog(title, initial, onSave, { taken = null, placeholder = "" } = {}) {
+  openModal({ title, width: 460, build: ({ body, close }) => {
+    const inp = el("input", "inp"); inp.value = initial || ""; inp.placeholder = placeholder; inp.style.width = "100%";
+    body.appendChild(inp);
+    const save = () => {
+      const name = inp.value.trim(); if (!name) return;
+      const t = taken === null ? data : taken;
+      if (name !== initial && name in t) { alert(`"${name}" already exists.`); return; }
+      close(); onSave(name);
     };
-    const fav = isFav(cat, p);
-    const favB = mk(fav ? "★" : "☆", "btn-ghost", () => toggleFav(cat, p));
-    if (fav) favB.classList.add("fav-on");
-    mk("Copy", "btn-ghost", () => copyText(p));
-    mk("Move", "btn-ghost", e => openMoveMenu(e, cat, i));
-    mk("Edit", "btn-ghost-purp", () => openEditor(i, cat));
-    mk("Delete", "btn-danger", () => deletePrompt(cat, i));
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") save(); });
+    setTimeout(() => { inp.focus(); inp.select(); }, 30);
+    body.parentElement.querySelector(".modal-footer").append(
+      Object.assign(el("button", "btn btn-ghost tall", "Cancel"), { onclick: close }),
+      Object.assign(el("button", "btn btn-acc", "Save"), { onclick: save }));
+  } });
+}
 
-    header.appendChild(left);
-    header.appendChild(btns);
+// Hervorgehobene Textbox
+const HL = [
+  [/\((?:[^()]|\([^()]*\))*:\s*-?\d+(?:\.\d+)?\s*\)/y, "hl-w"], [/\(+[^():]*\)+/y, "hl-e"], [/\[[^\[\]]*\]/y, "hl-d"],
+  [/__[A-Za-z0-9 _\-\/]+__/y, "hl-x"], [/<[^<>]+>/y, "hl-l"], [/BREAK\b/y, "hl-b"],
+];
+function highlightHtml(text) {
+  let out = "", i = 0;
+  while (i < text.length) {
+    let hit = null;
+    for (const [re, cls] of HL) { re.lastIndex = i; const m = re.exec(text); if (m && m.index === i) { hit = [m[0], cls]; break; } }
+    if (hit) { out += `<span class="${hit[1]}">${escHtml(hit[0])}</span>`; i += hit[0].length; }
+    else { out += escHtml(text[i]); i++; }
+  }
+  return out + "\n";
+}
+function makeHlBox(initial = "", minHeight = 120) {
+  const wrap = el("div", "hl-wrap");
+  const back = el("pre", "hl-back"); const code = el("code"); back.appendChild(code);
+  const ta = el("textarea", "hl-ta"); ta.value = initial; ta.style.minHeight = minHeight + "px"; ta.spellcheck = false;
+  wrap.append(back, ta);
+  const sync = () => { code.innerHTML = highlightHtml(ta.value); back.scrollTop = ta.scrollTop; };
+  ta.addEventListener("input", sync); ta.addEventListener("scroll", () => back.scrollTop = ta.scrollTop);
+  sync();
+  return { wrap, ta, sync };
+}
+function attachCounter(ta, label) {
+  const upd = () => {
+    const t = ta.value, tok = estimateTokens(t);
+    label.textContent = `${t.length} chars · ${t.split(/\s+/).filter(Boolean).length} words · ~${tok} tokens` + (tok > 75 ? ` · ${Math.ceil(tok / 75)} chunks of 75` : "");
+    label.classList.toggle("warn", tok > 150);
+  };
+  ta.addEventListener("input", upd); upd(); return upd;
+}
 
-    const divider = document.createElement("div");
-    divider.className = "card-divider";
-    const txt = document.createElement("div");
-    txt.className = "card-text";
-    txt.textContent = p;
-
-    card.appendChild(header);
-    card.appendChild(divider);
-    card.appendChild(txt);
-    wrap.appendChild(card);
+// ── Sidebar / Kategorien ────────────────────────────────────────────
+function sortedCats() {
+  const c = cats();
+  if (settings.catSort === "alpha") return c.slice().sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  if (settings.catSort === "count") return c.slice().sort((a, b) => data[b].length - data[a].length);
+  return c;
+}
+let catDragSrc = null;
+function renderSidebar() {
+  const list = $("cat-list"); list.innerHTML = "";
+  const manual = settings.catSort === "manual";
+  for (const cat of sortedCats()) {
+    const row = el("div", "cat-row" + (cat === selected ? " selected" : ""));
+    row.innerHTML = `<div class="cat-bar"></div><div class="cat-name">${escHtml(cat)}</div><div class="cat-badge">${data[cat].length}</div>`;
+    row.onclick = () => { switchView("library"); selectCat(cat); };
+    row.addEventListener("contextmenu", e => { e.preventDefault(); openCatMenu(e.clientX, e.clientY, cat); });
+    if (manual) {
+      row.draggable = true;
+      row.addEventListener("dragstart", e => { catDragSrc = cat; e.dataTransfer.effectAllowed = "move"; });
+      row.addEventListener("dragover", e => { e.preventDefault(); row.classList.add("drag-over"); });
+      row.addEventListener("dragleave", () => row.classList.remove("drag-over"));
+      row.addEventListener("drop", e => { e.preventDefault(); row.classList.remove("drag-over"); if (catDragSrc && catDragSrc !== cat) moveCategoryTo(catDragSrc, cat); catDragSrc = null; });
+    }
+    list.appendChild(row);
+  }
+  const tabs = $("mob-cats"); tabs.innerHTML = "";
+  for (const cat of sortedCats()) {
+    const tab = el("div", "mob-cat" + (cat === selected ? " selected" : ""), cat);
+    tab.onclick = () => { switchView("library"); selectCat(cat); };
+    let pressTimer;
+    tab.addEventListener("touchstart", e => { const t = e.touches[0]; pressTimer = setTimeout(() => { ignoreNextClick = true; openCatMenu(t.clientX, t.clientY, cat); }, 600); }, { passive: true });
+    ["touchend", "touchmove", "touchcancel"].forEach(ev => tab.addEventListener(ev, () => clearTimeout(pressTimer), { passive: true }));
+    tabs.appendChild(tab);
+  }
+  const plus = el("div", "mob-cat", "+"); plus.onclick = newCategory; tabs.appendChild(plus);
+}
+function openCatMenu(x, y, cat) {
+  openPopMenu(x, y, [
+    { label: `Rename "${cat}"`, action: () => renameCategory(cat) },
+    { label: "Move up", action: () => moveCategory(cat, -1) },
+    { label: "Move down", action: () => moveCategory(cat, 1) },
+    { sep: true },
+    { label: "Add to Builder as slot", action: () => { addSlot(cat); switchView("builder"); } },
+    { label: "Export as wildcard .txt", action: () => exportWildcards([cat]) },
+    { sep: true },
+    { label: `Delete "${cat}"`, danger: true, action: () => deleteCategory(cat) },
+  ], "CATEGORY");
+}
+function openCatSortMenu(e) {
+  const opts = [["manual", "Manual (drag to sort)"], ["alpha", "A → Z"], ["count", "Most prompts"]];
+  openPopMenu(e.clientX, e.clientY, opts.map(([k, l]) => ({ label: (settings.catSort === k ? "●  " : "    ") + l, action: () => { settings.catSort = k; saveSettings(); renderSidebar(); } })), "SORT CATEGORIES");
+}
+function reorderData(order) { const d = {}; for (const c of order) d[c] = data[c]; data = d; saveData(); renderSidebar(); }
+function moveCategory(cat, delta) {
+  const c = cats(), i = c.indexOf(cat), j = i + delta; if (j < 0 || j >= c.length) return;
+  [c[i], c[j]] = [c[j], c[i]]; settings.catSort = "manual"; saveSettings(); reorderData(c);
+}
+function moveCategoryTo(src, dst) { const c = cats(); c.splice(c.indexOf(src), 1); c.splice(c.indexOf(dst), 0, src); reorderData(c); }
+function newCategory() {
+  nameDialog("New Category", "", name => { data[name] = []; saveData(); renderSidebar(); switchView("library"); selectCat(name); });
+}
+function renameCategory(cat) {
+  nameDialog(`Rename "${cat}"`, cat, name => {
+    if (name === cat) return;
+    const d = {}; for (const k of cats()) d[k === cat ? name : k] = data[k]; data = d;
+    slots.forEach(s => { if (s.cat === cat) s.cat = name; });
+    rules.forEach(r => { if (r.if_cat === cat) r.if_cat = name; if (r.then_cat === cat) r.then_cat = name; });
+    saveData(); if (selected === cat) selected = name; renderSidebar(); selectCat(selected); saveBuilderState();
   });
 }
-
-function escHtml(s) {
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-// ── CRUD ──────────────────────────────────────────────────────────────────────
-
-function isDup(cat, text, skipIndex = null) {
-  const t = text.trim().toLowerCase();
-  return (data[cat] || []).some((p, i) => i !== skipIndex && p.trim().toLowerCase() === t);
-}
-
-function deletePrompt(cat, index) {
-  const p = data[cat][index];
-  const preview = p.length > 70 ? p.slice(0, 70) + "…" : p;
-  if (!confirm(`Delete this prompt?\n\n"${preview}"`)) return;
-  const wasFav = isFav(cat, p);
-  data[cat].splice(index, 1);
-  if (wasFav && !data[cat].includes(p)) {
-    favs[cat].splice(favs[cat].indexOf(p), 1);
-    saveFavs();
-  }
-  pushUndo(["prompt", cat, index, p, wasFav]);
-  saveData(data);
-  refresh();
+function deleteCategory(cat) {
+  const n = data[cat].length;
+  if (!confirmDlg(`Delete "${cat}" with ${plural(n, "prompt")}?`)) return;
+  const pos = cats().indexOf(cat), prompts = data[cat];
+  undoStack.push(["category", cat, prompts, pos]); if (undoStack.length > 30) undoStack.shift();
+  for (const p of prompts) trash.unshift({ cat, prompt: p, deleted: nowIso() });
+  saveTrash(); delete data[cat]; saveData();
+  if (selected === cat) selected = null;
+  renderSidebar(); selectCat(selected || cats()[0] || null);
   showToast("Deleted — Ctrl+Z to undo");
 }
-
-function openMoveMenu(e, cat, index) {
-  const items = cats().filter(c => c !== cat).map(c => ({
-    label: `${c} (${(data[c] || []).length})`,
-    action: () => movePrompt(cat, index, c)
-  }));
-  if (!items.length) { showToast("No other category"); return; }
-  openPopMenu(e.clientX, e.clientY, items, "MOVE TO");
-}
-
-function movePrompt(cat, index, target) {
-  const p = data[cat][index];
-  if (isDup(target, p) && !confirm(`This prompt already exists in "${target}".\nMove anyway?`)) return;
-  const wasFav = isFav(cat, p);
-  data[cat].splice(index, 1);
-  if (wasFav && !data[cat].includes(p)) favs[cat].splice(favs[cat].indexOf(p), 1);
-  data[target].push(p);
-  if (wasFav && !isFav(target, p)) (favs[target] || (favs[target] = [])).push(p);
-  saveFavs();
-  saveData(data);
-  refresh();
-  showToast(`Moved to "${target}"`);
-}
-
-function refresh() {
-  renderSidebar();
-  if (selected) selectCat(selected);
-}
-
-// ── Editor ────────────────────────────────────────────────────────────────────
-
-function openEditor(index = null, cat = null) {
-  editIndex = index;
-  editCat = cat || selected;
-  batchMode = false;
-  editorCallback = null;
-  const title = document.getElementById("editor-title");
-  const ta    = document.getElementById("editor-ta");
-  document.getElementById("editor-hint").textContent = "";
-  title.textContent = index === null ? `Add Prompt  —  ${editCat}` : `Edit Prompt  —  ${editCat}`;
-  ta.value = index === null ? "" : data[editCat][index];
-  document.getElementById("editor-overlay").classList.remove("hidden");
-  ta.focus();
-}
-
-// Editor-Modal als generischen Texteditor nutzen (Builder-Textslots)
-function openTextEditor(title, initial, cb) {
-  editIndex = null;
-  batchMode = false;
-  editorCallback = cb;
-  document.getElementById("editor-title").textContent = title;
-  document.getElementById("editor-hint").textContent = "";
-  const ta = document.getElementById("editor-ta");
-  ta.value = initial;
-  document.getElementById("editor-overlay").classList.remove("hidden");
-  ta.focus();
-}
-
-function openBatch() {
-  editIndex = null;
-  batchMode = true;
-  document.getElementById("editor-title").textContent = `Add Batch  —  ${selected}`;
-  document.getElementById("editor-hint").textContent =
-    "Paste numbered prompts:  1: ...  2. ...  3) ...";
-  const ta = document.getElementById("editor-ta");
-  ta.value = "";
-  document.getElementById("editor-overlay").classList.remove("hidden");
-  ta.focus();
-}
-
-function closeEditor() {
-  editorCallback = null;
-  document.getElementById("editor-overlay").classList.add("hidden");
-}
-
-function saveEditor() {
-  const text = document.getElementById("editor-ta").value.trim();
-  if (!text) return;
-  if (editorCallback) {
-    const cb = editorCallback;
-    closeEditor();
-    cb(text);
-    return;
+function selectCat(cat) {
+  const prev = selected; selected = cat;
+  if (prev !== cat) { selection.clear(); tagFilter.clear(); $("search").value = ""; }
+  if (!cat) {
+    $("title-lbl").textContent = "Select a category"; $("count-lbl").textContent = "";
+    ["add-btn", "batch-btn", "rnd-btn"].forEach(id => $(id).disabled = true);
+    renderSidebar(); renderPrompts(); return;
   }
-  if (batchMode) {
-    const prompts = splitBatch(text);
-    if (!prompts.length) return;
-    let added = 0, skipped = 0;
-    for (const p of prompts) {
-      if (isDup(selected, p)) { skipped++; continue; }
-      data[selected].push(p);
-      added++;
-    }
-    saveData(data);
-    closeEditor();
-    refresh();
-    showToast(skipped
-      ? `${added} added, ${skipped} duplicate${skipped !== 1 ? "s" : ""} skipped`
-      : `${added} prompt${added !== 1 ? "s" : ""} added!`);
-    return;
-  }
-  if (editIndex === null) {
-    if (isDup(editCat, text) && !confirm(`This prompt already exists in "${editCat}".\nAdd anyway?`)) return;
-    data[editCat].push(text);
-  } else {
-    if (isDup(editCat, text, editIndex) && !confirm(`This prompt already exists in "${editCat}".\nSave anyway?`)) return;
-    const old = data[editCat][editIndex];
-    data[editCat][editIndex] = text;
-    // Favoriten-Stern mitnehmen
-    if (isFav(editCat, old) && !data[editCat].includes(old)) {
-      favs[editCat][favs[editCat].indexOf(old)] = text;
-      saveFavs();
-    }
-  }
-  saveData(data);
-  closeEditor();
-  refresh();
+  const lst = data[cat] || [], n = lst.length, favs = lst.filter(p => p.fav).length;
+  const tags = new Set(lst.flatMap(p => p.tags));
+  $("title-lbl").textContent = cat;
+  $("count-lbl").textContent = plural(n, "Prompt") + (favs ? `  ·  ${favs} ★` : "") + (tags.size ? `  ·  ${plural(tags.size, "tag")}` : "");
+  $("add-btn").disabled = false; $("batch-btn").disabled = false; $("rnd-btn").disabled = n === 0;
+  renderSidebar(); renderPrompts();
 }
-
-function editorOverlayClick(e) {
-  if (e.target === document.getElementById("editor-overlay")) closeEditor();
-}
-
-// ── Random ────────────────────────────────────────────────────────────────────
-
-function openRandom() {
-  const sel = document.getElementById("rnd-cat");
-  sel.innerHTML = cats().map(c => `<option${c === selected ? " selected" : ""}>${escHtml(c)}</option>`).join("");
-  document.getElementById("rnd-results").innerHTML = "";
-  document.getElementById("rnd-info").textContent = "";
-  document.getElementById("copy-all-btn").disabled = true;
-  lastRndResults = [];
-  document.getElementById("rnd-overlay").classList.remove("hidden");
-  generateRandom();
-}
-
-function closeRandom() {
-  document.getElementById("rnd-overlay").classList.add("hidden");
-}
-
-function rndOverlayClick(e) {
-  if (e.target === document.getElementById("rnd-overlay")) closeRandom();
-}
-
-function generateRandom() {
-  const cat  = document.getElementById("rnd-cat").value;
-  const n    = Math.max(1, parseInt(document.getElementById("rnd-count").value) || 10);
-  const pool = data[cat] || [];
-  const res  = document.getElementById("rnd-results");
-  res.innerHTML = "";
-  document.getElementById("copy-all-btn").disabled = true;
-  lastRndResults = [];
-
-  if (!pool.length) {
-    res.innerHTML = '<p class="empty-msg" style="margin-top:30px;">No prompts in this category.</p>';
-    document.getElementById("rnd-info").textContent = "";
-    return;
-  }
-
-  const actual  = Math.min(n, pool.length);
-  const picked  = [...pool].sort(() => Math.random() - 0.5).slice(0, actual);
-  lastRndResults = picked;
-  const note = actual < n ? ` (max. ${actual} available)` : "";
-  document.getElementById("rnd-info").textContent =
-    `${actual} Prompts from "${cat}"${note}  —  scroll with mouse wheel`;
-
-  picked.forEach((p, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.style.marginBottom = "6px";
-    card.innerHTML = `
-      <div class="card-header">
-        <span class="card-num">#${String(i + 1).padStart(2, "0")}</span>
-        <button class="btn btn-ghost" onclick="copyText(${JSON.stringify(p)})">Copy</button>
-      </div>
-      <div class="card-divider"></div>
-      <div class="card-text">${escHtml(p)}</div>`;
-    res.appendChild(card);
-  });
-  document.getElementById("copy-all-btn").disabled = false;
-}
-
-function copyAll() {
-  copyText(lastRndResults.join("\n\n"));
-}
-
-// ── Builder (Baukasten) ───────────────────────────────────────────────────────
-
+function refresh() { renderSidebar(); selectCat(selected); }
 function switchView(name) {
-  if (activeView === name) {
-    if (name === "builder") renderSlots();
-    return;
-  }
+  if (activeView === name) { if (name === "builder") renderSlots(); return; }
   activeView = name;
-  document.getElementById("lib-view").classList.toggle("hidden", name !== "library");
-  document.getElementById("builder-view").classList.toggle("hidden", name !== "builder");
-  document.querySelectorAll(".view-tab").forEach(b =>
-    b.classList.toggle("active", b.dataset.view === name));
-  document.getElementById("mob-cats").style.display = name === "builder" ? "none" : "";
+  $("lib-view").classList.toggle("hidden", name !== "library");
+  $("builder-view").classList.toggle("hidden", name !== "builder");
+  document.querySelectorAll(".view-tab").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+  $("mob-cats").style.display = name === "builder" ? "none" : "";
   if (name === "builder") renderSlots();
 }
 
-function rollSlot(s, force = false) {
-  if (s.type === "text") { s.value = s.text || ""; return; }
-  const pool = data[s.cat] || [];
-  if (!pool.length) { s.value = null; return; }
-  // Gewicht = Wahrscheinlichkeit, dass der Slot diese Runde gefüllt wird
-  if (!force && Math.random() * 100 > (s.weight ?? 100)) { s.value = null; return; }
-  s.value = pool[Math.floor(Math.random() * pool.length)];
+// ── Prompt-Liste ────────────────────────────────────────────────────
+function findPrompt(id) {
+  for (const cat of cats()) { const i = data[cat].findIndex(p => p.id === id); if (i >= 0) return { cat, i, p: data[cat][i] }; }
+  return null;
 }
-
-function randomizeAll() {
-  if (!slots.length) { showToast("Add slots first"); return; }
-  slots.forEach(s => { if (!s.locked) rollSlot(s); });
-  renderSlots();
-  recordHistory();
-}
-
-function rerollSlot(i) {
-  if (slots[i].locked) return;
-  rollSlot(slots[i], true);
-  renderSlots();
-  recordHistory();
-}
-
-function moveSlot(i, d) {
-  const j = i + d;
-  if (j < 0 || j >= slots.length) return;
-  [slots[i], slots[j]] = [slots[j], slots[i]];
-  renderSlots();
-}
-
-function cycleWeight(i) {
-  const steps = [100, 75, 50, 25];
-  const s = slots[i];
-  s.weight = steps[(steps.indexOf(s.weight ?? 100) + 1) % steps.length];
-  renderSlots();
-}
-
-function renderSlots() {
-  const wrap = document.getElementById("slot-wrap");
-  wrap.innerHTML = "";
-  if (!slots.length) {
-    wrap.innerHTML = '<p class="empty-msg">No slots yet.<br>Click  + Slot  to add a category or free-text slot.</p>';
-    updateResult();
-    return;
-  }
-  slots.forEach((s, i) => {
-    const card = document.createElement("div");
-    card.className = "slot-card" + (s.locked ? " locked" : "");
-
-    const head = document.createElement("div");
-    head.className = "slot-head";
-
-    const idx = document.createElement("span");
-    idx.className = "slot-idx";
-    idx.textContent = "#" + String(i + 1).padStart(2, "0");
-    head.appendChild(idx);
-
-    const name = document.createElement("span");
-    name.className = "slot-name" + (s.type === "text" ? " txt" : "");
-    name.textContent = s.type === "text" ? "✏ Free Text" : `${s.cat} (${(data[s.cat] || []).length})`;
-    head.appendChild(name);
-
-    const mk = (label, cls, fn, title) => {
-      const b = document.createElement("button");
-      b.className = "btn " + cls;
-      b.textContent = label;
-      if (title) b.title = title;
-      b.addEventListener("click", fn);
-      head.appendChild(b);
-      return b;
-    };
-
-    mk("↑", "btn-ghost", () => moveSlot(i, -1), "Move up");
-    mk("↓", "btn-ghost", () => moveSlot(i, 1), "Move down");
-    if (s.type === "cat") {
-      const wB = mk(`${s.weight ?? 100}%`, "btn-ghost", () => cycleWeight(i), "Chance this slot is used per roll");
-      if ((s.weight ?? 100) < 100) wB.style.color = "var(--purp)";
-      mk(s.locked ? "🔒" : "🔓", "btn-ghost", () => { s.locked = !s.locked; renderSlots(); }, "Lock value");
-      mk("Pick", "btn-ghost-purp", () => openPick(i), "Pick a prompt manually");
-      const rB = mk("🎲", "btn-ghost", () => rerollSlot(i), "Reroll this slot");
-      if (s.locked) rB.disabled = true;
-    } else {
-      mk("Edit", "btn-ghost-purp", () => editTextSlot(i));
-    }
-    mk("✕", "btn-danger", () => { slots.splice(i, 1); renderSlots(); }, "Remove slot");
-
-    const divider = document.createElement("div");
-    divider.className = "card-divider";
-
-    const val = document.createElement("div");
-    const text = s.type === "text" ? (s.text || "") : s.value;
-    if (text) {
-      val.className = "slot-val";
-      val.textContent = text;
-    } else {
-      val.className = "slot-val none";
-      val.textContent = (data[s.cat] || []).length
-        ? "— skipped this round — press Randomize"
-        : "Category is empty";
-    }
-
-    card.appendChild(head);
-    card.appendChild(divider);
-    card.appendChild(val);
-    wrap.appendChild(card);
+function isDup(cat, text, skipId = null) { const t = text.trim().toLowerCase(); return (data[cat] || []).some(p => p.id !== skipId && p.text.toLowerCase() === t); }
+function sortKey() { return $("sort-sel").value; }
+function onSortChange() { settings.promptSort = sortKey(); saveSettings(); renderPrompts(); }
+function dragEnabled() { return sortKey() === "manual" && !$("all-chk").checked && !$("search").value.trim() && !favFilter && !tagFilter.size; }
+function visibleItems() {
+  const raw = $("search").value.trim().toLowerCase();
+  const tagTerms = [], words = [];
+  for (const tok of raw.split(/\s+/).filter(Boolean)) (tok.startsWith("tag:") && tok.length > 4 ? tagTerms : words).push(tok.replace(/^tag:/, ""));
+  const global = $("all-chk").checked;
+  const cs = global ? cats() : (selected ? [selected] : []);
+  const items = [];
+  for (const cat of cs) data[cat].forEach((p, i) => {
+    if (favFilter && !p.fav) return;
+    if (tagFilter.size && ![...tagFilter].every(t => p.tags.includes(t))) return;
+    if (tagTerms.length && !tagTerms.every(t => p.tags.some(pt => pt.includes(t)))) return;
+    if (words.length) { const hay = [p.text, p.title, p.note, p.tags.join(" "), (p.variants || []).join(" ")].join(" ").toLowerCase(); if (!words.every(w => hay.includes(w))) return; }
+    items.push({ cat, i, p });
   });
-  updateResult();
+  const k = sortKey();
+  if (k === "alpha") items.sort((a, b) => (a.p.title || a.p.text).toLowerCase().localeCompare((b.p.title || b.p.text).toLowerCase()));
+  else if (k === "used") items.sort((a, b) => (b.p.uses || 0) - (a.p.uses || 0));
+  else if (k === "recent") items.sort((a, b) => (b.p.last_used || "").localeCompare(a.p.last_used || ""));
+  else if (k === "newest") items.sort((a, b) => (b.p.created || "").localeCompare(a.p.created || ""));
+  else if (k === "longest") items.sort((a, b) => b.p.text.length - a.p.text.length);
+  return items;
+}
+function allTags(cs) {
+  const counts = {};
+  for (const c of cs) for (const p of data[c] || []) for (const t of p.tags) counts[t] = (counts[t] || 0) + 1;
+  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+function renderTagBar() {
+  const bar = $("tag-bar"); bar.innerHTML = "";
+  if (!selected && !$("all-chk").checked) return;
+  const tags = allTags($("all-chk").checked ? cats() : [selected]);
+  if (!tags.length) return;
+  bar.appendChild(el("span", "bar-label", "TAGS"));
+  for (const [t, n] of tags.slice(0, 30)) {
+    const c = el("span", "chip click" + (tagFilter.has(t) ? " on" : ""), `#${t} ${n}`);
+    c.onclick = () => toggleTagFilter(t); bar.appendChild(c);
+  }
+  if (tagFilter.size) { const c = el("span", "chip click red", "✕ clear"); c.onclick = () => { tagFilter.clear(); renderPrompts(); }; bar.appendChild(c); }
+}
+function toggleTagFilter(t) { tagFilter.has(t) ? tagFilter.delete(t) : tagFilter.add(t); renderPrompts(); }
+function renderBulkBar() {
+  const bar = $("bulk-bar"); bar.innerHTML = "";
+  if (!selection.size) { bar.classList.add("hidden"); return; }
+  bar.classList.remove("hidden");
+  bar.appendChild(el("span", "count", `${selection.size} selected`));
+  const ids = () => [...selection];
+  const mk = (label, cls, fn) => { const b = el("button", "btn btn-ghost " + cls, label); b.onclick = fn; bar.appendChild(b); };
+  mk("Copy", "acc", () => copyPrompts(ids()));
+  mk("Move…", "acc", e => openMoveMenu(e, ids()));
+  mk("★ Star", "gold", () => bulkFav(ids(), true));
+  mk("☆ Unstar", "", () => bulkFav(ids(), false));
+  mk("Tag…", "purp", () => bulkTag(ids()));
+  mk("Delete", "danger", () => deletePrompts(ids()));
+  bar.appendChild(el("span", "spacer"));
+  mk("Select all (Ctrl+A)", "", selectAllVisible);
+  mk("Clear", "", () => { selection.clear(); renderPrompts(); });
+}
+let promptDragSrc = null;
+function renderPrompts() {
+  const wrap = $("list-wrap"); wrap.innerHTML = "";
+  renderTagBar(); renderBulkBar();
+  const global = $("all-chk").checked;
+  if (!global && !selected) { wrap.innerHTML = '<p class="empty-msg">← Select a category on the left</p>'; return; }
+  const items = visibleItems(); visibleCache = items;
+  if (!items.length) {
+    const q = $("search").value.trim();
+    let msg = "No prompts yet.\nClick  + Prompt  to add one  (Ctrl+N).";
+    if (q) msg = `No results for "${q}"`; else if (favFilter) msg = "No favorites yet.\nClick ☆ on a prompt to star it."; else if (tagFilter.size) msg = "No prompts with these tags.";
+    wrap.innerHTML = `<p class="empty-msg">${escHtml(msg).replace(/\n/g, "<br>")}</p>`; return;
+  }
+  const frag = document.createDocumentFragment();
+  items.forEach(({ cat, i, p }) => frag.appendChild(makeCard(cat, i, p, global)));
+  wrap.appendChild(frag);
+}
+function makeCard(cat, idx, p, showCat) {
+  const sel = selection.has(p.id);
+  const card = el("div", "card" + (sel ? " selected" : ""));
+  const head = el("div", "card-header");
+  const cb = el("span", "cb" + (sel ? " on" : ""), sel ? "☑" : "☐"); cb.onclick = () => toggleSelect(p.id); head.appendChild(cb);
+  if (dragEnabled()) {
+    const g = el("span", "grip", "⋮⋮"); head.appendChild(g);
+    g.addEventListener("mousedown", () => card.draggable = true);
+    card.addEventListener("dragstart", e => { promptDragSrc = idx; e.dataTransfer.effectAllowed = "move"; });
+    card.addEventListener("dragend", () => { card.draggable = false; });
+    card.addEventListener("dragover", e => { e.preventDefault(); card.classList.add("drag-over"); });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", e => { e.preventDefault(); card.classList.remove("drag-over"); if (promptDragSrc != null && promptDragSrc !== idx) dropPrompt(promptDragSrc, idx); promptDragSrc = null; });
+  }
+  head.appendChild(el("span", "card-num", "#" + String(idx + 1).padStart(2, "0")));
+  if (showCat) { const c = el("span", "chip purp click", cat); c.onclick = () => { $("all-chk").checked = false; selectCat(cat); }; head.appendChild(c); }
+  if (p.title) head.appendChild(el("span", "card-title", p.title));
+  const btns = el("div", "card-btns");
+  const mk = (label, cls, fn) => { const b = el("button", "btn btn-ghost " + cls, label); b.onclick = fn; btns.appendChild(b); return b; };
+  mk(p.fav ? "★" : "☆", p.fav ? "on" : "", () => toggleFav(p.id));
+  mk("Copy", "", () => copyPrompt(p.id));
+  mk("Move", "", e => openMoveMenu(e, [p.id]));
+  mk("Edit", "purp", () => editPrompt(p.id));
+  mk("Delete", "danger", () => deletePrompts([p.id]));
+  head.appendChild(btns);
+  const txt = el("div", "card-text", p.text);
+  txt.onclick = () => openDetail(p.id); txt.ondblclick = () => editPrompt(p.id);
+  card.append(head, el("div", "card-divider"), txt);
+  const foot = el("div", "card-foot"); let has = false;
+  for (const t of p.tags) { const c = el("span", "chip click" + (tagFilter.has(t) ? " on" : ""), "#" + t); c.onclick = () => toggleTagFilter(t); foot.appendChild(c); has = true; }
+  if (p.variants && p.variants.length) { foot.appendChild(el("span", "chip purp", `+${plural(p.variants.length, "variant")}`)); has = true; }
+  if (p.note) { const c = el("span", "chip click", "✎ note"); c.onclick = () => openDetail(p.id); foot.appendChild(c); has = true; }
+  const right = el("span", "right");
+  if (p.weight !== 5) { right.appendChild(el("span", "", `weight ${p.weight}/10`)); has = true; }
+  if (p.uses) { right.appendChild(el("span", "", `used ${p.uses}×`)); has = true; }
+  if (right.childElementCount) foot.appendChild(right);
+  if (has) card.appendChild(foot);
+  card.addEventListener("contextmenu", e => { e.preventDefault(); openCardMenu(e.clientX, e.clientY, p.id); });
+  return card;
+}
+function openCardMenu(x, y, id) {
+  const f = findPrompt(id); if (!f) return;
+  const items = [
+    { label: "Copy", action: () => copyPrompt(id) }, { label: "Details", action: () => openDetail(id) },
+    { label: "Edit", action: () => editPrompt(id) }, { label: f.p.fav ? "Unstar" : "Star ★", action: () => toggleFav(id) },
+    { label: "Duplicate", action: () => duplicatePrompt(id) }, { sep: true },
+  ];
+  for (const c of cats()) if (c !== f.cat) items.push({ label: `Move to "${c}"`, action: () => movePrompts([id], c) });
+  items.push({ sep: true }, { label: "Use in Builder", action: () => useInBuilder(id) },
+    { label: selection.has(id) ? "Deselect" : "Select", action: () => toggleSelect(id) },
+    { label: "Delete", danger: true, action: () => deletePrompts([id]) });
+  openPopMenu(x, y, items);
 }
 
-function openAddSlotMenu(e) {
-  const items = [{ label: "✏ Free text...", action: addTextSlot }];
-  if (cats().length) items.push({ sep: true });
-  for (const c of cats()) {
-    items.push({ label: `${c} (${(data[c] || []).length})`, action: () => {
-      slots.push({ type: "cat", cat: c, value: null, locked: false, weight: 100 });
-      renderSlots();
-    }});
+// ── Auswahl ─────────────────────────────────────────────────────────
+function toggleSelect(id) { selection.has(id) ? selection.delete(id) : selection.add(id); renderPrompts(); }
+function selectAllVisible() {
+  const ids = new Set(visibleCache.map(v => v.p.id));
+  if (ids.size && [...ids].every(i => selection.has(i))) selection.clear(); else ids.forEach(i => selection.add(i));
+  renderPrompts();
+}
+function bulkFav(ids, v) { ids.forEach(id => { const f = findPrompt(id); if (f) f.p.fav = v; }); saveData(); refresh(); }
+function bulkTag(ids) {
+  nameDialog("Add tags (comma-separated, -tag removes)", "", text => {
+    const tags = normalizeTags(text), rm = tags.filter(t => t.startsWith("-")).map(t => t.slice(1)), add = tags.filter(t => !t.startsWith("-"));
+    for (const id of ids) { const f = findPrompt(id); if (!f) continue; const cur = f.p.tags.filter(t => !rm.includes(t)); for (const t of add) if (!cur.includes(t)) cur.push(t); f.p.tags = cur; }
+    saveData(); refresh(); showToast(`Tags updated on ${ids.length} prompts`);
+  }, { taken: {}, placeholder: "anime, realistic, -old" });
+}
+
+// ── CRUD ────────────────────────────────────────────────────────────
+function toggleFav(id) { const f = findPrompt(id); if (!f) return; f.p.fav = !f.p.fav; saveData(); refresh(); }
+function toggleFavFilter() { favFilter = !favFilter; const b = $("fav-btn"); b.textContent = favFilter ? "★" : "☆"; b.classList.toggle("on", favFilter); renderPrompts(); }
+function markUsed(ps) { for (const p of ps) { p.uses = (p.uses || 0) + 1; p.last_used = nowIso(); } saveData(); }
+function copyPrompt(id) { const f = findPrompt(id); if (!f) return; copyText(f.p.text); markUsed([f.p]); if (["used", "recent"].includes(sortKey())) renderPrompts(); }
+function copyPrompts(ids) { const ps = ids.map(findPrompt).filter(Boolean).map(f => f.p); if (!ps.length) return; copyText(ps.map(p => p.text).join("\n"), `Copied ${ps.length} prompts`); markUsed(ps); }
+function addPrompt() {
+  if (!selected) return; const cat = selected;
+  promptEditor({ title: `Add Prompt  —  ${cat}`, cat, onSave: p => {
+    if (isDup(cat, p.text) && !confirmDlg(`This prompt already exists in "${cat}".\nAdd anyway?`)) return;
+    data[cat].push(p); saveData(); refresh(); showToast("Prompt added");
+  } });
+}
+function addBatch() {
+  if (!selected) return; const cat = selected;
+  textEditor(`Add Batch  —  ${cat}`, "", text => {
+    const prompts = splitBatch(text); let added = 0, skipped = 0;
+    for (const t of prompts) { if (isDup(cat, t)) skipped++; else { data[cat].push(makePrompt(t)); added++; } }
+    saveData(); refresh(); showToast(skipped ? `${added} added, ${skipped} duplicate${skipped !== 1 ? "s" : ""} skipped` : `${plural(added, "prompt")} added`);
+  }, "Numbered (1: … 2. … 3) …) or one prompt per line");
+}
+function editPrompt(id) {
+  const f = findPrompt(id); if (!f) return;
+  promptEditor({ title: "Edit Prompt", cat: f.cat, prompt: f.p, onSave: p => {
+    if (p.text !== f.p.text && isDup(f.cat, p.text, id) && !confirmDlg(`This prompt already exists in "${f.cat}".\nSave anyway?`)) return;
+    data[f.cat][f.i] = p; saveData(); refresh();
+  } });
+}
+function deletePrompts(ids, ask = null) {
+  const entries = ids.map(findPrompt).filter(Boolean); if (!entries.length) return;
+  if (ask === null) ask = settings.confirmDelete;
+  if (ask) { const msg = entries.length === 1 ? `"${entries[0].p.text.slice(0, 70)}${entries[0].p.text.length > 70 ? "…" : ""}"` : `Delete ${entries.length} prompts?`; if (!confirmDlg(msg)) return; }
+  entries.sort((a, b) => a.cat === b.cat ? b.i - a.i : a.cat.localeCompare(b.cat));
+  const undo = [];
+  for (const { cat, i, p } of entries) { data[cat].splice(i, 1); undo.push([cat, i, p]); trash.unshift({ cat, prompt: p, deleted: nowIso() }); selection.delete(p.id); }
+  saveTrash(); undoStack.push(["prompts", undo]); if (undoStack.length > 30) undoStack.shift();
+  saveData(); refresh(); showToast(`Deleted ${entries.length}  —  Ctrl+Z to undo`);
+}
+function openMoveMenu(e, ids) {
+  const srcs = new Set(ids.map(findPrompt).filter(Boolean).map(f => f.cat));
+  const items = cats().filter(c => !(srcs.size === 1 && srcs.has(c))).map(c => ({ label: `Move to "${c}"`, action: () => movePrompts(ids, c) }));
+  items.push({ sep: true }, { label: "＋ New category…", action: () => nameDialog("New Category", "", n => { data[n] = []; renderSidebar(); movePrompts(ids, n); }) });
+  openPopMenu(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2, items, "MOVE TO");
+}
+function movePrompts(ids, target) {
+  if (!(target in data)) data[target] = [];
+  let moved = 0;
+  for (const id of ids) {
+    const f = findPrompt(id); if (!f || f.cat === target) continue;
+    if (isDup(target, f.p.text) && !confirmDlg(`"${f.p.text.slice(0, 60)}" already exists in "${target}".\nMove anyway?`)) continue;
+    data[f.cat].splice(f.i, 1); data[target].push(f.p); moved++;
   }
+  selection.clear(); saveData(); refresh(); showToast(`Moved ${moved} to "${target}"`);
+}
+function duplicatePrompt(id) {
+  const f = findPrompt(id); if (!f) return;
+  data[f.cat].splice(f.i + 1, 0, makePrompt(f.p.text, { title: f.p.title, tags: [...f.p.tags], note: f.p.note, weight: f.p.weight, variants: [...(f.p.variants || [])] }));
+  saveData(); refresh(); showToast("Duplicated");
+}
+function dropPrompt(src, dst) { const lst = data[selected]; if (!lst) return; const [p] = lst.splice(src, 1); lst.splice(dst, 0, p); saveData(); renderPrompts(); }
+function useInBuilder(id) {
+  const f = findPrompt(id); if (!f) return;
+  slots.push(Object.assign(newSlot("cat", f.cat), { value: f.p.text, locked: true }));
+  switchView("builder"); showToast(`Added locked slot from "${f.cat}"`);
+}
+function undo() {
+  const e = undoStack.pop(); if (!e) { showToast("Nothing to undo"); return; }
+  if (e[0] === "prompts") {
+    const entries = e[1].slice().sort((a, b) => a[1] - b[1]);
+    for (const [cat, i, p] of entries) { const lst = data[cat] || (data[cat] = []); if (!lst.some(x => x.id === p.id)) lst.splice(Math.min(i, lst.length), 0, p); trash = trash.filter(t => t.prompt.id !== p.id); }
+    saveTrash(); saveData(); refresh(); showToast(`Restored ${plural(entries.length, "prompt")}`);
+  } else {
+    const [, name, prompts, pos] = e;
+    if (name in data) data[name].push(...prompts);
+    else { const entries = Object.entries(data); entries.splice(Math.min(pos, entries.length), 0, [name, prompts]); data = Object.fromEntries(entries); }
+    const ids = new Set(prompts.map(p => p.id)); trash = trash.filter(t => !ids.has(t.prompt.id)); saveTrash();
+    saveData(); renderSidebar(); selectCat(name); showToast(`Restored category "${name}"`);
+  }
+}
+
+// ── Editoren ────────────────────────────────────────────────────────
+function textEditor(title, initial, onSave, hint) {
+  openModal({ title, hint, width: 700, build: ({ body, foot, close }) => {
+    const box = makeHlBox(initial, 200); body.appendChild(box.wrap);
+    const cnt = el("div", "counter"); body.appendChild(cnt); attachCounter(box.ta, cnt);
+    const save = () => { const t = box.ta.value.trim(); close(); if (t) onSave(t); };
+    box.ta.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") save(); });
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Cancel"), { onclick: close }), Object.assign(el("button", "btn btn-acc", "Save  (Ctrl+Enter)"), { onclick: save }));
+    setTimeout(() => box.ta.focus(), 30);
+  } });
+}
+function promptEditor({ title, cat, prompt = null, onSave }) {
+  openModal({ title, hint: prompt ? cat : null, width: 860, build: ({ body, foot, close }) => {
+    const row = el("div", "row");
+    const tWrap = el("div", "grow"); tWrap.appendChild(el("div", "lbl", "Title (optional)"));
+    const titleInp = el("input", "inp"); titleInp.style.width = "100%"; titleInp.value = prompt ? prompt.title || "" : ""; titleInp.placeholder = "short name"; tWrap.appendChild(titleInp);
+    const wWrap = el("div"); const wLbl = el("div", "lbl", `Weight ${prompt ? prompt.weight : 5}/10`); wWrap.appendChild(wLbl);
+    const wInp = el("input"); wInp.type = "range"; wInp.min = 1; wInp.max = 10; wInp.value = prompt ? prompt.weight : 5; wInp.style.width = "180px"; wInp.title = "Relative draw frequency in the Builder (5 = normal)";
+    wInp.oninput = () => wLbl.textContent = `Weight ${wInp.value}/10`; wWrap.appendChild(wInp);
+    row.append(tWrap, wWrap); body.appendChild(row);
+    body.appendChild(el("div", "lbl", "Prompt"));
+    const box = makeHlBox(prompt ? prompt.text : "", 150); body.appendChild(box.wrap);
+    const cRow = el("div", "row"); cRow.appendChild(el("span", "hint", "(word:1.2)  ((emphasis))  [de-emphasis]  __wildcard__  <lora:x:1>"));
+    const cnt = el("span", "counter grow"); cRow.appendChild(cnt); body.appendChild(cRow); attachCounter(box.ta, cnt);
+    body.appendChild(el("div", "lbl", "Tags (comma-separated)"));
+    const tagsInp = el("input", "inp"); tagsInp.style.width = "100%"; tagsInp.value = prompt ? prompt.tags.join(", ") : ""; tagsInp.placeholder = "anime, nsfw, summer"; body.appendChild(tagsInp);
+    const existing = allTags(cats());
+    if (existing.length) {
+      const tr = el("div", "row");
+      for (const [t] of existing.slice(0, 18)) { const c = el("span", "chip click", "+" + t); c.onclick = () => { const cur = normalizeTags(tagsInp.value); if (!cur.includes(t)) { cur.push(t); tagsInp.value = cur.join(", "); } }; tr.appendChild(c); }
+      body.appendChild(tr);
+    }
+    body.appendChild(el("div", "lbl", "Note"));
+    const note = el("textarea", "ta"); note.rows = 2; note.value = prompt ? prompt.note || "" : ""; body.appendChild(note);
+    body.appendChild(el("div", "lbl", "Variants — one per line, the Builder picks one at random"));
+    const vbox = makeHlBox(prompt ? (prompt.variants || []).join("\n") : "", 70); body.appendChild(vbox.wrap);
+    const save = () => {
+      const text = box.ta.value.trim(); if (!text) { showToast("Prompt text is empty"); return; }
+      const p = prompt ? Object.assign({}, prompt) : makePrompt(text);
+      p.text = text; p.title = titleInp.value.trim(); p.tags = normalizeTags(tagsInp.value); p.note = note.value.trim(); p.weight = parseInt(wInp.value);
+      p.variants = vbox.ta.value.split("\n").map(l => l.trim()).filter(l => l && l !== text);
+      close(); onSave(p);
+    };
+    [box.ta, note, vbox.ta, titleInp, tagsInp].forEach(w => w.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") save(); }));
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Cancel"), { onclick: close }), Object.assign(el("button", "btn btn-acc", "Save  (Ctrl+Enter)"), { onclick: save }));
+    setTimeout(() => box.ta.focus(), 30);
+  } });
+}
+
+// ── Detailansicht ───────────────────────────────────────────────────
+function openDetail(id) {
+  const f = findPrompt(id); if (!f) return; const p = f.p;
+  openModal({ title: p.title || `Prompt #${f.i + 1}`, hint: f.cat, width: 760, build: ({ body, foot, close }) => {
+    body.appendChild(el("div", "lbl", `created ${fmtTs(p.created)}   ·   used ${p.uses || 0}×   ·   last ${fmtTs(p.last_used)}   ·   weight ${p.weight}/10   ·   ~${estimateTokens(p.text)} tokens`));
+    if (p.tags.length) { const r = el("div", "row"); for (const t of p.tags) { const c = el("span", "chip purp click", "#" + t); c.onclick = () => { close(); toggleTagFilter(t); }; r.appendChild(c); } body.appendChild(r); }
+    const box = makeHlBox(p.text, 140); box.ta.readOnly = true; body.appendChild(box.wrap);
+    if (p.variants && p.variants.length) {
+      body.appendChild(el("div", "lbl-sec", "VARIANTS"));
+      for (const v of p.variants) { const r = el("div", "pick-item", v); r.onclick = () => copyText(v); body.appendChild(r); }
+    }
+    if (p.note) { body.appendChild(el("div", "lbl-sec", "NOTE")); body.appendChild(el("div", "stat", p.note)); }
+    if (p.image) body.appendChild(el("div", "hint", `Example image "${p.image}" is only shown in the desktop app.`));
+    const mk = (l, cls, fn) => { const b = el("button", "btn " + cls, l); b.onclick = fn; foot.appendChild(b); };
+    mk("Delete", "btn-red", () => { close(); deletePrompts([id]); });
+    mk("Edit", "btn-purp", () => { close(); editPrompt(id); });
+    mk(p.fav ? "Unstar" : "★ Star", "btn-gold", () => { close(); toggleFav(id); });
+    mk("Copy", "btn-acc", () => copyPrompt(id));
+  } });
+}
+
+// ── Random ──────────────────────────────────────────────────────────
+function openRandom() {
+  if (!selected) return;
+  openModal({ title: "Random Prompts", purp: true, width: 820, build: ({ body, foot, close }) => {
+    const ctrl = el("div", "row");
+    const catSel = el("select", "sel"); for (const c of cats()) { const o = el("option", "", c); o.value = c; if (c === selected) o.selected = true; catSel.appendChild(o); }
+    const nInp = el("input", "inp"); nInp.value = settings.randomCount; nInp.style.width = "70px"; nInp.type = "number"; nInp.min = 1;
+    const tagInp = el("input", "inp"); tagInp.placeholder = "tag filter"; tagInp.style.width = "140px";
+    const favL = el("label", "chk"); const favC = el("input"); favC.type = "checkbox"; favL.append(favC, document.createTextNode("★ only"));
+    const gen = el("button", "btn btn-purp", "Generate");
+    ctrl.append(catSel, nInp, tagInp, favL, gen); body.appendChild(ctrl);
+    const info = el("div", "lbl"); body.appendChild(info);
+    const list = el("div", "list-box"); list.style.minHeight = "300px"; body.appendChild(list);
+    let picked = [];
+    const run = () => {
+      list.innerHTML = ""; const n = Math.max(1, parseInt(nInp.value) || 10);
+      let pool = data[catSel.value] || []; const tag = tagInp.value.trim().toLowerCase();
+      if (tag) pool = pool.filter(p => p.tags.some(t => t.includes(tag)));
+      if (favC.checked) pool = pool.filter(p => p.fav);
+      if (!pool.length) { list.innerHTML = '<p class="empty-msg" style="margin-top:30px">No prompts match.</p>'; copyAll.el.disabled = true; picked = []; return; }
+      picked = pool.slice().sort(() => Math.random() - 0.5).slice(0, Math.min(n, pool.length));
+      info.textContent = `${picked.length} prompts from "${catSel.value}"` + (picked.length < n ? ` (max. ${picked.length} available)` : "");
+      picked.forEach((p, i) => {
+        const c = el("div", "card"); c.style.marginBottom = "6px";
+        const h = el("div", "card-header"); h.appendChild(el("span", "card-num", "#" + String(i + 1).padStart(2, "0")));
+        const b = el("button", "btn btn-ghost", "Copy"); b.style.marginLeft = "auto"; b.onclick = () => { copyText(p.text); markUsed([p]); }; h.appendChild(b);
+        const t = el("div", "card-text", p.text); t.style.cursor = "default";
+        c.append(h, el("div", "card-divider"), t); list.appendChild(c);
+      });
+      copyAll.el.disabled = false;
+    };
+    gen.onclick = run;
+    const copyAll = { el: el("button", "btn btn-acc", "Copy All") }; copyAll.el.onclick = () => { copyText(picked.map(p => p.text).join("\n\n"), "Copied all"); markUsed(picked); };
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }), copyAll.el);
+    run();
+  } });
+}
+
+// ══ BUILDER ═════════════════════════════════════════════════════════
+function newSlot(type = "cat", cat = "", text = "") {
+  return { type, cat, text, value: type === "text" ? text : null, locked: false, weight: 100, count_min: 1, count_max: 1, negative: false, tag_filter: "" };
+}
+function normalizeSlot(s) {
+  const b = newSlot(s.type || "cat", s.cat || "", s.text || "");
+  for (const k of Object.keys(b)) if (s[k] != null) b[k] = s[k];
+  if (b.type === "text") b.value = b.text;
+  b.weight = Math.max(0, Math.min(100, parseInt(b.weight) || 0)); b.count_min = Math.max(1, parseInt(b.count_min) || 1); b.count_max = Math.max(b.count_min, parseInt(b.count_max) || 1);
+  return b;
+}
+function slotPool(slot, extra = []) {
+  let pool = (data[slot.cat] || []).slice();
+  const tf = (slot.tag_filter || "").trim().toLowerCase();
+  if (tf) { const terms = splitTerms(tf); pool = pool.filter(p => terms.some(t => p.tags.some(tag => tag.includes(t)))); }
+  for (const [mode, terms] of extra) pool = pool.filter(p => termsMatch(p.text, p.tags, terms) === (mode === "only"));
+  return pool;
+}
+function weightedSample(pool, k) {
+  pool = pool.slice(); const out = [];
+  while (pool.length && out.length < k) {
+    const total = pool.reduce((s, p) => s + Math.max(1, p.weight || 5), 0); let r = Math.random() * total, idx = 0;
+    for (let i = 0; i < pool.length; i++) { r -= Math.max(1, pool[i].weight || 5); if (r <= 0) { idx = i; break; } }
+    out.push(pool[idx]); pool.splice(idx, 1);
+  }
+  return out;
+}
+function rollSlot(slot, force = false, extra = []) {
+  if (slot.type === "text") { slot.value = slot.text || ""; return; }
+  const pool = slotPool(slot, extra);
+  if (!pool.length) { slot.value = null; return; }
+  if (!force && Math.random() * 100 > slot.weight) { slot.value = null; return; }
+  const lo = slot.count_min, hi = Math.max(lo, slot.count_max), k = lo + Math.floor(Math.random() * (hi - lo + 1));
+  const texts = weightedSample(pool, k).map(p => { const v = promptTexts(p); return v[Math.floor(Math.random() * v.length)]; });
+  slot.value = (k === 1 && hi === 1) ? texts[0] : texts;
+}
+const slotVals = s => Array.isArray(s.value) ? s.value.filter(Boolean) : (s.value ? [s.value] : []);
+function ruleFilters() {
+  const out = {};
+  for (const r of rules) {
+    if (!r.if_cat || !r.then_cat) continue;
+    const trig = splitTerms(r.if_match || "");
+    const triggered = slots.some(s => s.type === "cat" && s.cat === r.if_cat && slotVals(s).length && (!trig.length || slotVals(s).some(v => termsMatch(v, [], trig))));
+    if (!triggered) continue;
+    const terms = splitTerms(r.terms || "");
+    slots.forEach((s, i) => { if (s.type === "cat" && s.cat === r.then_cat) (out[i] = out[i] || []).push([r.mode || "only", terms]); });
+  }
+  return out;
+}
+function applyRules(force = false) {
+  for (let pass = 0; pass < 2; pass++) {
+    const filters = ruleFilters(); let changed = false;
+    for (const [idx, fl] of Object.entries(filters)) {
+      const s = slots[idx]; if (s.locked) continue;
+      const allowed = new Set(slotPool(s, fl).flatMap(promptTexts)); const vals = slotVals(s);
+      if (vals.length && vals.every(v => allowed.has(v))) continue;
+      if (!vals.length && !force) continue;
+      rollSlot(s, vals.length > 0 || force, fl); changed = true;
+    }
+    if (!changed) break;
+  }
+}
+function randomizeAll() { if (!slots.length) { showToast("Add slots first"); return; } slots.forEach(s => { if (!s.locked) rollSlot(s); }); applyRules(); renderSlots(); recordHistory(); }
+function rerollSlot(i) { rollSlot(slots[i], true); applyRules(); renderSlots(); recordHistory(); }
+let slotDragSrc = null;
+function renderSlots() {
+  const wrap = $("slot-wrap"); wrap.innerHTML = "";
+  $("slot-count-lbl").textContent = plural(slots.length, "Slot") + (rules.length ? `  ·  ${plural(rules.length, "rule")}` : "");
+  $("roll-btn").disabled = !slots.length;
+  $("tpl-lbl").textContent = activeTemplate ? `⌘ ${activeTemplate}` : "";
+  if (!slots.length) { wrap.innerHTML = '<p class="empty-msg">No slots yet.<br>Click  + Slot  to add a category or free text,<br>then  🎲 Randomize  (or press Space) to roll.</p>'; updateResult(); saveBuilderState(); return; }
+  slots.forEach((s, i) => wrap.appendChild(makeSlotCard(s, i)));
+  updateResult(); saveBuilderState();
+}
+function makeSlotCard(s, i) {
+  const isText = s.type === "text";
+  const card = el("div", "card" + (s.locked ? " locked" : "") + (s.negative ? " negative" : ""));
+  const head = el("div", "card-header");
+  const g = el("span", "grip", "⋮⋮"); head.appendChild(g);
+  g.addEventListener("mousedown", () => card.draggable = true);
+  card.addEventListener("dragstart", e => { slotDragSrc = i; e.dataTransfer.effectAllowed = "move"; });
+  card.addEventListener("dragend", () => card.draggable = false);
+  card.addEventListener("dragover", e => { e.preventDefault(); card.classList.add("drag-over"); });
+  card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+  card.addEventListener("drop", e => { e.preventDefault(); card.classList.remove("drag-over"); if (slotDragSrc != null && slotDragSrc !== i) { const [x] = slots.splice(slotDragSrc, 1); slots.splice(i, 0, x); renderSlots(); } slotDragSrc = null; });
+  head.appendChild(el("span", "card-num", "#" + String(i + 1).padStart(2, "0")));
+  const missing = !isText && !(s.cat in data);
+  head.appendChild(el("span", "slot-name" + (isText ? " txt" : missing ? " missing" : ""), isText ? "✏ Free Text" : s.cat + (missing ? "  (missing)" : "")));
+  if (s.negative) head.appendChild(el("span", "chip red", "NEG"));
+  if (!isText) {
+    if (s.count_max > 1 || s.count_min > 1) head.appendChild(el("span", "chip acc", s.count_min === s.count_max ? `×${s.count_min}` : `×${s.count_min}–${s.count_max}`));
+    if (s.tag_filter) head.appendChild(el("span", "chip", "#" + s.tag_filter));
+  }
+  const btns = el("div", "card-btns");
+  const mk = (l, cls, fn, title) => { const b = el("button", "btn btn-ghost " + cls, l); b.onclick = fn; if (title) b.title = title; btns.appendChild(b); return b; };
+  if (isText) mk("Edit", "purp", () => textEditor("Edit Free Text Slot", s.text || "", t => { s.text = t; s.value = t; renderSlots(); }));
+  else {
+    mk(`${s.weight}%`, s.weight < 100 ? "acc" : "", () => slotSettings(i), "Fill probability");
+    mk("⚙", "", () => slotSettings(i), "Slot settings");
+    mk(s.locked ? "🔒" : "🔓", s.locked ? "acc" : "", () => { s.locked = !s.locked; renderSlots(); }, "Lock value");
+    mk("Pick", "purp", () => openPick(i));
+    mk("🎲", "purp", () => rerollSlot(i), "Reroll this slot");
+  }
+  mk(s.negative ? "POS" : "NEG", s.negative ? "acc" : "danger", () => { s.negative = !s.negative; renderSlots(); }, "Move to negative / positive prompt");
+  mk("✕", "danger", () => { slots.splice(i, 1); renderSlots(); });
+  head.appendChild(btns);
+  const valText = slotVals(s).join($("sep-input").value || ", ");
+  let v;
+  if (valText) v = el("div", "card-text", valText);
+  else v = el("div", "card-text none", isText ? "(empty text)" : !slotPool(s).length ? "(no prompts match this slot)" : s.weight < 100 ? "— skipped this roll —" : "— not rolled yet —");
+  v.style.cursor = "default";
+  card.append(head, el("div", "card-divider"), v);
+  return card;
+}
+function openAddSlotMenu(e) {
+  const items = [{ label: "✏  Free text…", action: () => textEditor("Free Text Slot", "", t => { slots.push(newSlot("text", "", t)); renderSlots(); }, "Fixed text, e.g. quality tags — never rerolled") }];
+  if (cats().length) items.push({ sep: true });
+  for (const c of cats()) items.push({ label: `${c}  (${data[c].length})`, action: () => addSlot(c) });
   openPopMenu(e.clientX, e.clientY, items, "ADD SLOT");
 }
-
-function addTextSlot() {
-  openTextEditor("Free Text Slot", "", text => {
-    slots.push({ type: "text", text, value: text, locked: false, weight: 100 });
-    renderSlots();
-  });
+function addSlot(cat) { const s = newSlot("cat", cat); rollSlot(s, true); slots.push(s); renderSlots(); }
+function slotSettings(i) {
+  const s = slots[i];
+  openModal({ title: `Slot Settings  —  ${s.cat}`, purp: true, width: 520, build: ({ body, foot, close }) => {
+    body.appendChild(el("div", "lbl", "Fill probability"));
+    const r1 = el("div", "row"); const w = el("input"); w.type = "range"; w.min = 0; w.max = 100; w.step = 5; w.value = s.weight; w.className = "grow";
+    const wl = el("span", "stat", `${s.weight} %`); w.oninput = () => wl.textContent = `${w.value} %`; r1.append(w, wl); body.appendChild(r1);
+    body.appendChild(el("div", "lbl", "How many prompts to draw (min – max)"));
+    const r2 = el("div", "row"); const lo = el("input", "inp"); lo.type = "number"; lo.min = 1; lo.value = s.count_min; lo.style.width = "70px";
+    const hi = el("input", "inp"); hi.type = "number"; hi.min = 1; hi.value = s.count_max; hi.style.width = "70px";
+    r2.append(lo, el("span", "lbl", "–"), hi, el("span", "hint", "e.g. 2 – 4 for accessories")); body.appendChild(r2);
+    body.appendChild(el("div", "lbl", "Only prompts with tag (comma = any of)"));
+    const tf = el("input", "inp"); tf.value = s.tag_filter || ""; tf.placeholder = "e.g. summer, beach"; tf.style.width = "100%"; body.appendChild(tf);
+    const tags = [...new Set((data[s.cat] || []).flatMap(p => p.tags))].sort();
+    if (tags.length) body.appendChild(el("div", "hint", "Available: " + tags.slice(0, 20).join(", ") + (tags.length > 20 ? " …" : "")));
+    const nl = el("label", "chk"); const nc = el("input"); nc.type = "checkbox"; nc.checked = !!s.negative; nl.append(nc, document.createTextNode("Goes into the negative prompt")); body.appendChild(nl);
+    const save = () => {
+      const l = Math.max(1, parseInt(lo.value) || 1), h = Math.max(l, parseInt(hi.value) || 1);
+      s.weight = parseInt(w.value); s.count_min = l; s.count_max = h; s.tag_filter = tf.value.trim(); s.negative = nc.checked;
+      close(); rollSlot(s, true); renderSlots();
+    };
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Cancel"), { onclick: close }), Object.assign(el("button", "btn btn-purp", "Save & roll"), { onclick: save }));
+  } });
 }
-
-function editTextSlot(i) {
-  openTextEditor("Edit Free Text", slots[i].text || "", text => {
-    slots[i].text = text;
-    slots[i].value = text;
-    renderSlots();
-  });
+function openPick(i) {
+  const s = slots[i], pool = slotPool(s);
+  if (!pool.length) { showToast(`No prompts in "${s.cat}"`); return; }
+  openModal({ title: `Pick Prompt  —  ${s.cat}`, purp: true, hint: "click to use · Ctrl-click for several", width: 700, build: ({ body, foot, close }) => {
+    const q = el("input", "inp"); q.placeholder = "Search…"; q.style.width = "100%"; body.appendChild(q);
+    const list = el("div", "list-box"); list.style.minHeight = "320px"; body.appendChild(list);
+    const chosen = new Set();
+    const use = () => { const texts = [...chosen]; if (!texts.length) return; s.value = texts.length === 1 ? texts[0] : texts; s.locked = true; close(); renderSlots(); };
+    const fill = () => {
+      list.innerHTML = ""; const qq = q.value.trim().toLowerCase();
+      for (const p of pool) {
+        if (qq && !p.text.toLowerCase().includes(qq) && !p.tags.some(t => t.includes(qq))) continue;
+        const it = el("div", "pick-item" + (chosen.has(p.text) ? " on" : ""), (p.fav ? "★ " : "") + p.text);
+        it.onclick = e => { if (e.ctrlKey || e.metaKey) { chosen.has(p.text) ? chosen.delete(p.text) : chosen.add(p.text); it.classList.toggle("on"); } else { chosen.clear(); chosen.add(p.text); use(); } };
+        list.appendChild(it);
+      }
+    };
+    q.oninput = fill; fill(); setTimeout(() => q.focus(), 30);
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Cancel"), { onclick: close }), Object.assign(el("button", "btn btn-purp", "Use selected"), { onclick: use }));
+  } });
 }
-
-// ── Builder: Ergebnis ─────────────────────────────────────────────────────────
-
-function resultText() {
-  return slots
-    .map(s => (s.type === "text" ? (s.text || "") : (s.value || "")).trim())
-    .filter(Boolean)
-    .join(document.getElementById("sep-input").value || ", ");
-}
-
-function updateResult() {
-  const el = document.getElementById("result-text");
-  const t = resultText();
-  if (t) {
-    el.textContent = t;
-    el.classList.remove("empty");
-  } else {
-    el.textContent = slots.length ? "Press Randomize to generate a result..." : "Add slots and press Randomize...";
-    el.classList.add("empty");
+function resultParts(negative = false, wildcard = null) {
+  wildcard = wildcard === null ? $("wild-chk").checked : wildcard;
+  const parts = [];
+  for (const s of slots) {
+    if (!!s.negative !== negative) continue;
+    if (wildcard && s.type === "cat" && !s.locked) { const n = Math.max(1, s.count_min); for (let k = 0; k < (s.count_max > 1 ? n : 1); k++) parts.push(`__${s.cat}__`); continue; }
+    parts.push(...slotVals(s));
   }
-  document.getElementById("copy-res-btn").disabled = !t;
-  document.getElementById("save-res-btn").disabled = !t;
+  return parts;
 }
-
-function copyResult() {
-  const t = resultText();
-  if (t) copyText(t);
+function resultText(negative = false, wildcard = null) { const p = resultParts(negative, wildcard); return p.length ? p.join($("sep-input").value || ", ") : ""; }
+function updateResult() {
+  const t = resultText(), neg = resultText(true), elR = $("result-text");
+  if (t) { elR.textContent = t; elR.classList.remove("empty"); } else { elR.textContent = slots.length ? "Press Randomize to generate a result…" : "Add slots and press Randomize…"; elR.classList.add("empty"); }
+  const hasNeg = slots.some(s => s.negative); $("neg-wrap").classList.toggle("hidden", !hasNeg); $("neg-text").textContent = neg || "—";
+  const tok = estimateTokens(t); $("tok-lbl").textContent = t ? `${t.length} chars · ~${tok} tokens` + (tok > 75 ? ` · ${Math.ceil(tok / 75)} chunks` : "") : ""; $("tok-lbl").classList.toggle("warn", tok > 150);
+  $("copy-res-btn").disabled = !t; $("save-res-btn").disabled = !t;
 }
-
+function onSepChange() { updateResult(); renderSlots(); }
+function markSlotUsage() {
+  const used = [];
+  for (const s of slots) { if (s.type !== "cat") continue; const vals = slotVals(s); if (!vals.length) continue; for (const p of data[s.cat] || []) if (vals.some(v => promptTexts(p).includes(v))) used.push(p); }
+  if (used.length) markUsed(used);
+}
+function copyResult() { const t = resultText(); if (t) { copyText(t, "Result copied"); markSlotUsage(); } }
+function copyNegative() { const t = resultText(true); if (t) copyText(t, "Negative copied"); }
 function openSaveResultMenu(e) {
-  if (!resultText()) return;
-  const items = cats().map(c => ({
-    label: `${c} (${(data[c] || []).length})`,
-    action: () => saveResultTo(c)
-  }));
-  if (!items.length) { showToast("No categories"); return; }
+  const t = resultText(); if (!t) return;
+  const items = cats().map(c => ({ label: `Save to "${c}"`, action: () => saveTextTo(c, t) }));
+  items.push({ sep: true }, { label: "＋ New category…", action: () => nameDialog("New Category", "", n => { data[n] = []; renderSidebar(); saveTextTo(n, t); }) });
   openPopMenu(e.clientX, e.clientY, items, "SAVE TO");
 }
+function saveTextTo(cat, t) { if (isDup(cat, t)) { showToast(`Already in "${cat}"`); return; } data[cat].push(makePrompt(t, { tags: ["builder"] })); saveData(); refresh(); showToast(`Saved to "${cat}"`); }
 
-function saveResultTo(cat) {
-  const t = resultText();
-  if (!t) return;
-  if (isDup(cat, t)) { showToast(`Already exists in "${cat}"`); return; }
-  data[cat].push(t);
-  saveData(data);
-  renderSidebar();
-  showToast(`Saved to "${cat}"`);
+// Batch
+function rollCopy() {
+  const backup = slots.map(s => Object.assign({}, s, { value: Array.isArray(s.value) ? [...s.value] : s.value }));
+  slots.forEach(s => { if (!s.locked) rollSlot(s); }); applyRules();
+  const res = [resultText(false, false), resultText(true, false)];
+  slots.forEach((s, i) => Object.assign(s, backup[i]));
+  return res;
+}
+function openBatchGenerate() {
+  if (!slots.length) { showToast("Add slots first"); return; }
+  openModal({ title: "Batch Generate", purp: true, hint: "rolls the current slots N times", width: 860, build: ({ body, foot, close }) => {
+    const ctrl = el("div", "row"); const n = el("input", "inp"); n.type = "number"; n.value = 10; n.min = 1; n.max = 500; n.style.width = "80px";
+    const ul = el("label", "chk"); const uc = el("input"); uc.type = "checkbox"; uc.checked = true; ul.append(uc, document.createTextNode("unique only"));
+    const info = el("span", "lbl"); const gen = el("button", "btn btn-purp", "Generate"); gen.style.marginLeft = "auto";
+    ctrl.append(el("span", "lbl", "Count"), n, ul, info, gen); body.appendChild(ctrl);
+    const list = el("div", "list-box"); list.style.minHeight = "340px"; body.appendChild(list);
+    let results = [];
+    gen.onclick = () => {
+      const N = Math.max(1, Math.min(500, parseInt(n.value) || 10)); const out = [], seen = new Set();
+      for (let k = 0; k < (uc.checked ? N * 4 : N) && out.length < N; k++) { const [pos, neg] = rollCopy(); if (!pos || (uc.checked && seen.has(pos))) continue; seen.add(pos); out.push([pos, neg]); }
+      results = out; list.innerHTML = ""; info.textContent = `${out.length} results`;
+      out.forEach(([pos, neg], i) => {
+        const c = el("div", "card"); c.style.marginBottom = "6px"; const h = el("div", "card-header");
+        h.appendChild(el("span", "card-num", "#" + String(i + 1).padStart(2, "0"))); const b = el("button", "btn btn-ghost", "Copy"); b.style.marginLeft = "auto"; b.onclick = () => copyText(pos); h.appendChild(b);
+        const t = el("div", "card-text", pos); t.style.cursor = "default"; c.append(h, el("div", "card-divider"), t);
+        if (neg) { const ng = el("div", "card-text none", "NEG  " + neg); c.appendChild(ng); }
+        list.appendChild(c);
+      });
+      [cAll, sAll, exp].forEach(b => b.disabled = !out.length);
+    };
+    const cAll = el("button", "btn btn-acc", "Copy All"); cAll.onclick = () => copyText(results.map(r => r[0]).join("\n"), `Copied ${results.length} results`);
+    const sAll = el("button", "btn btn-gold", "★ Save all…"); sAll.onclick = e => openPopMenu(e.clientX, e.clientY, cats().map(c => ({ label: `Save all to "${c}"`, action: () => { let a = 0; for (const [pos] of results) if (!isDup(c, pos)) { data[c].push(makePrompt(pos, { tags: ["builder"] })); a++; } saveData(); refresh(); showToast(`Saved ${a} to "${c}"`); } })), "SAVE ALL TO");
+    const exp = el("button", "btn btn-ghost tall", "Export .txt"); exp.onclick = () => downloadText("promptvault_batch.txt", results.map(([p, ng]) => p + (ng ? "\nNEGATIVE: " + ng : "") + "\n").join("\n"));
+    [cAll, sAll, exp].forEach(b => b.disabled = true);
+    foot.append(exp, sAll, cAll);
+  } });
 }
 
-// ── Builder: History (nur im Speicher) ────────────────────────────────────────
+// Regeln
+function openRules() {
+  openModal({ title: "Rules", purp: true, hint: "if a slot of category A rolled X, restrict category B", width: 900, build: ({ body, foot, close }) => {
+    const list = el("div", "list-box"); list.style.minHeight = "260px"; body.appendChild(list);
+    const render = () => {
+      list.innerHTML = "";
+      if (!rules.length) list.innerHTML = '<p class="empty-msg" style="margin-top:30px">No rules yet.<br>Example: if Outfit contains “bikini” → Environment only “beach, pool”</p>';
+      rules.forEach((r, i) => {
+        const c = el("div", "card"); c.style.marginBottom = "6px"; const h = el("div", "card-header");
+        h.appendChild(el("span", "stat", `if  ${r.if_cat}` + (r.if_match ? `  contains  “${r.if_match}”` : "  is filled")));
+        h.appendChild(el("span", "slot-name", `→  ${r.then_cat}  ${r.mode === "only" ? "only" : "exclude"}  “${r.terms || ""}”`));
+        const x = el("button", "btn btn-ghost danger", "✕"); x.style.marginLeft = "auto"; x.onclick = () => { rules.splice(i, 1); render(); renderSlots(); }; h.appendChild(x);
+        c.appendChild(h); list.appendChild(c);
+      });
+    };
+    const cs = cats().length ? cats() : [""];
+    const mkSel = (opts, val) => { const s = el("select", "sel"); for (const o of opts) { const e = el("option", "", o); e.value = o; if (o === val) e.selected = true; s.appendChild(e); } return s; };
+    const f1 = el("div", "row"), f2 = el("div", "row");
+    const ifCat = mkSel(cs, cs[0]), ifMatch = el("input", "inp"); ifMatch.placeholder = "bikini, swimsuit  (empty = any)"; ifMatch.className = "inp grow";
+    const thenCat = mkSel(cs, cs[cs.length - 1]), mode = mkSel(["only", "exclude"], "only"), terms = el("input", "inp grow"); terms.placeholder = "beach, pool  (text or tag)";
+    const add = el("button", "btn btn-purp", "+ Add rule");
+    add.onclick = () => { if (!terms.value.trim()) { showToast("Enter terms for the THEN part"); return; } rules.push({ if_cat: ifCat.value, if_match: ifMatch.value.trim(), then_cat: thenCat.value, mode: mode.value, terms: terms.value.trim() }); terms.value = ""; ifMatch.value = ""; render(); renderSlots(); };
+    f1.append(el("span", "lbl", "IF"), ifCat, el("span", "lbl", "contains"), ifMatch);
+    f2.append(el("span", "lbl", "THEN"), thenCat, mode, terms, add);
+    body.append(f1, f2); render();
+    foot.appendChild(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }));
+  } });
+}
 
+// History
 function recordHistory() {
-  const t = resultText();
-  if (!t || histArr[0] === t) return;
-  histArr.unshift(t);
-  if (histArr.length > 20) histArr.pop();
+  const t = resultText(false, false); if (!t || (history[0] && history[0].text === t)) return;
+  history.unshift({ text: t, neg: resultText(true, false), template: activeTemplate || "", ts: nowIso(), pinned: false }); saveHistory();
 }
-
 function openHistory() {
-  const list = document.getElementById("hist-list");
-  list.innerHTML = "";
-  if (!histArr.length) {
-    list.innerHTML = '<p class="empty-msg" style="margin-top:30px;">No results yet.<br>Press Randomize in the Builder.</p>';
-  }
-  histArr.forEach((t, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.style.marginBottom = "6px";
-
-    const header = document.createElement("div");
-    header.className = "card-header";
-    const num = document.createElement("span");
-    num.className = "card-num";
-    num.textContent = "#" + String(i + 1).padStart(2, "0");
-    const copyB = document.createElement("button");
-    copyB.className = "btn btn-ghost";
-    copyB.textContent = "Copy";
-    copyB.addEventListener("click", () => copyText(t));
-    header.appendChild(num);
-    header.appendChild(copyB);
-
-    const divider = document.createElement("div");
-    divider.className = "card-divider";
-    const txt = document.createElement("div");
-    txt.className = "card-text";
-    txt.textContent = t;
-
-    card.appendChild(header);
-    card.appendChild(divider);
-    card.appendChild(txt);
-    list.appendChild(card);
-  });
-  document.getElementById("hist-overlay").classList.remove("hidden");
+  openModal({ title: `History  —  ${history.length} results`, purp: true, width: 860, build: ({ body, foot, close }) => {
+    const q = el("input", "inp"); q.placeholder = "Filter…"; q.style.width = "100%"; body.appendChild(q);
+    const list = el("div", "list-box"); list.style.minHeight = "360px"; body.appendChild(list);
+    const render = () => {
+      list.innerHTML = ""; const qq = q.value.trim().toLowerCase();
+      const shown = history.filter(e => !qq || e.text.toLowerCase().includes(qq) || (e.template || "").toLowerCase().includes(qq));
+      if (!shown.length) list.innerHTML = '<p class="empty-msg" style="margin-top:40px">No results yet.<br>Roll the dice first.</p>';
+      for (const e of shown) {
+        const c = el("div", "card" + (e.pinned ? " locked" : "")); c.style.marginBottom = "6px"; const h = el("div", "card-header");
+        h.appendChild(el("span", "hint", fmtTs(e.ts))); if (e.template) h.appendChild(el("span", "chip purp", e.template));
+        const btns = el("div", "card-btns");
+        const mk = (l, cls, fn) => { const b = el("button", "btn btn-ghost " + cls, l); b.onclick = fn; btns.appendChild(b); };
+        mk("Copy", "", () => copyText(e.text)); mk("★ Save", "gold", ev => openPopMenu(ev.clientX, ev.clientY, cats().map(cat => ({ label: `Save to "${cat}"`, action: () => saveTextTo(cat, e.text) })), "SAVE TO"));
+        mk(e.pinned ? "Unpin" : "📌", e.pinned ? "gold" : "", () => { e.pinned = !e.pinned; saveHistory(); render(); });
+        mk("✕", "danger", () => { history.splice(history.indexOf(e), 1); saveHistory(); render(); });
+        h.appendChild(btns); const t = el("div", "card-text", e.text); t.style.cursor = "default"; c.append(h, el("div", "card-divider"), t);
+        if (e.neg) c.appendChild(el("div", "card-text none", "NEG  " + e.neg));
+        list.appendChild(c);
+      }
+    };
+    q.oninput = render; render();
+    const clr = el("button", "btn btn-red", "Clear unpinned"); clr.onclick = () => { if (confirmDlg("Delete all unpinned history entries?")) { history = history.filter(e => e.pinned); saveHistory(); render(); } };
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }), clr);
+  } });
 }
 
-function closeHistory() {
-  document.getElementById("hist-overlay").classList.add("hidden");
+// Templates
+function templatePayload() {
+  return { slots: slots.map(s => s.type === "text" ? { type: "text", text: s.text || "", negative: !!s.negative } : { type: "cat", cat: s.cat, weight: s.weight, count_min: s.count_min, count_max: s.count_max, negative: !!s.negative, tag_filter: s.tag_filter || "" }), rules: rules.map(r => ({ ...r })) };
 }
-
-// ── Builder: Pick (manuell wählen) ────────────────────────────────────────────
-
-let pickSlotIndex = null;
-
-function openPick(i) {
-  pickSlotIndex = i;
-  document.getElementById("pick-title").textContent = `Pick from "${slots[i].cat}"`;
-  document.getElementById("pick-search").value = "";
-  renderPickList();
-  document.getElementById("pick-overlay").classList.remove("hidden");
-  document.getElementById("pick-search").focus();
-}
-
-function renderPickList() {
-  const s = slots[pickSlotIndex];
-  if (!s) return;
-  const q = document.getElementById("pick-search").value.trim().toLowerCase();
-  const list = document.getElementById("pick-list");
-  list.innerHTML = "";
-  const pool = (data[s.cat] || []).filter(p => !q || p.toLowerCase().includes(q));
-  if (!pool.length) {
-    list.innerHTML = '<p class="empty-msg" style="margin-top:30px;">No prompts found.</p>';
-    return;
-  }
-  pool.forEach(p => {
-    const it = document.createElement("div");
-    it.className = "pick-item";
-    it.textContent = p;
-    it.addEventListener("click", () => {
-      s.value = p;
-      s.locked = true;   // manuell gewählt → fixieren
-      closePick();
-      renderSlots();
-    });
-    list.appendChild(it);
-  });
-}
-
-function closePick() {
-  document.getElementById("pick-overlay").classList.add("hidden");
-}
-
-// ── Builder: Templates ────────────────────────────────────────────────────────
-
 function openTplMenu(e) {
-  const items = [{ label: "💾 Save current as template...", action: () => {
-    if (!slots.length) { showToast("No slots to save"); return; }
-    nameMode = "template";
-    openNameModal("Save Template", "");
-  }}];
+  const items = [{ label: "Save as template…", disabled: !slots.length, action: () => nameDialog("Save Template", activeTemplate || "", n => { if (n in templates && !confirmDlg(`Overwrite "${n}"?`)) return; storeTemplate(n); }, { taken: {} }) }];
+  if (activeTemplate) items.push({ label: `Overwrite "${activeTemplate}"`, action: () => storeTemplate(activeTemplate) });
   const names = Object.keys(templates);
   if (names.length) {
     items.push({ sep: true });
-    for (const n of names) items.push({ label: n, action: () => loadTemplate(n) });
+    for (const n of names) items.push({ label: `Load: ${n}  (${(templates[n].slots || []).length})`, action: () => loadTemplate(n) });
     items.push({ sep: true });
-    for (const n of names) items.push({ label: `🗑 Delete "${n}"`, danger: true, action: () => {
-      if (!confirm(`Delete template "${n}"?`)) return;
-      delete templates[n];
-      saveTemplates();
-      showToast("Template deleted");
-    }});
+    for (const n of names) items.push({ label: `Rename "${n}"`, action: () => nameDialog(`Rename "${n}"`, n, nn => { if (nn === n) return; if (nn in templates) { alert("exists"); return; } const t = {}; for (const [k, v] of Object.entries(templates)) t[k === n ? nn : k] = v; templates = t; saveTemplates(); if (activeTemplate === n) { activeTemplate = nn; renderSlots(); } }, { taken: {} }) });
+    items.push({ sep: true });
+    for (const n of names) items.push({ label: `Delete "${n}"`, danger: true, action: () => { if (!confirmDlg(`Delete template "${n}"?`)) return; delete templates[n]; saveTemplates(); if (activeTemplate === n) { activeTemplate = null; renderSlots(); } } });
   }
   openPopMenu(e.clientX, e.clientY, items, "TEMPLATES");
 }
-
-function saveTemplate(name) {
-  templates[name] = slots.map(s => s.type === "text"
-    ? { type: "text", text: s.text || "" }
-    : { type: "cat", cat: s.cat, weight: s.weight ?? 100 });
-  saveTemplates();
-  showToast(`Template "${name}" saved`);
-}
-
+function storeTemplate(name) { templates[name] = templatePayload(); saveTemplates(); activeTemplate = name; renderSlots(); showToast(`Template "${name}" saved`); }
 function loadTemplate(name) {
-  const tpl = templates[name];
-  if (!Array.isArray(tpl)) return;
-  slots = [];
-  let missing = 0;
-  for (const e of tpl) {
-    if (typeof e === "string") {   // altes Format: nur Kategoriename
-      if (e in data) slots.push({ type: "cat", cat: e, value: null, locked: false, weight: 100 });
-      else missing++;
-    } else if (e && e.type === "text") {
-      slots.push({ type: "text", text: e.text || "", value: e.text || "", locked: false, weight: 100 });
-    } else if (e && e.cat in data) {
-      slots.push({ type: "cat", cat: e.cat, value: null, locked: false, weight: e.weight ?? 100 });
-    } else {
-      missing++;
+  const t = templates[name]; if (!t) return;
+  slots = (t.slots || []).map(normalizeSlot); rules = (t.rules || []).map(r => ({ ...r }));
+  slots.forEach(s => { if (s.type === "cat") rollSlot(s); }); applyRules(); activeTemplate = name; renderSlots(); recordHistory();
+}
+
+// ══ DIALOGE ═════════════════════════════════════════════════════════
+function openSettings() {
+  openModal({ title: "Settings", width: 760, build: ({ body, foot, close }) => {
+    const sec = t => body.appendChild(el("div", "lbl-sec", t));
+    const row = (k, w, hint) => { const r = el("div", "form-row"); r.appendChild(el("span", "k", k)); r.appendChild(w); if (hint) r.appendChild(el("span", "hint", hint)); body.appendChild(r); return w; };
+    const sel = (opts, val) => { const s = el("select", "sel"); for (const [v, l] of opts) { const o = el("option", "", l); o.value = v; if (v === val) o.selected = true; s.appendChild(o); } return s; };
+    const chk = val => { const c = el("input"); c.type = "checkbox"; c.checked = !!val; return c; };
+    const num = (val, w = 80) => { const i = el("input", "inp"); i.type = "number"; i.value = val; i.style.width = w + "px"; return i; };
+    body.appendChild(el("div", "lbl-sec", "APPEARANCE")).style.cssText = "margin-top:0;padding-top:0;border:none";
+    const theme = row("Theme", sel([["dark", "dark"], ["light", "light"]], settings.theme));
+    const accent = row("Accent color", sel(Object.keys(ACCENTS).map(k => [k, k]), settings.accent));
+    const fs = row("Font size", sel([["0.85", "small"], ["1", "normal"], ["1.15", "large"], ["1.3", "extra large"]], String(settings.fontScale)));
+    sec("BEHAVIOUR");
+    const sep = row("Default separator", Object.assign(el("input", "inp"), { value: settings.defaultSep, style: "width:80px" }));
+    const rnd = row("Random picker count", num(settings.randomCount));
+    const conf = row("Confirm before delete", chk(settings.confirmDelete), "Ctrl+Z / Trash still work");
+    sec("DATA");
+    const keep = row("Backups to keep", num(settings.backupsKeep), "in browser storage (limited to ~5 MB total)");
+    const intv = row("Backup interval (min)", num(settings.backupIntervalMin));
+    const tools = el("div", "row");
+    for (const [l, fn] of [["Backup now", () => { maybeBackup(true); showToast("Backup written"); }], ["Restore backup…", () => { close(); openBackups(); }], ["Trash…", () => { close(); openTrash(); }], ["Find duplicates…", () => { close(); openDuplicates(); }]]) { const b = el("button", "btn btn-ghost acc", l); b.onclick = fn; tools.appendChild(b); }
+    row("Tools", tools);
+    const used = Object.values(KEYS).reduce((s, k) => s + (localStorage.getItem(k) || "").length, 0);
+    body.appendChild(el("div", "hint", `Browser storage used by PromptVault: ~${(used / 1024).toFixed(0)} KB. Everything stays in this browser; export regularly.`));
+    const wipe = el("button", "btn btn-ghost danger", "Delete all local data…"); wipe.onclick = () => { if (confirmDlg("Delete ALL PromptVault data from this browser (prompts, templates, history, backups, settings)?\nThis cannot be undone.") && confirmDlg("Really delete everything?")) { Object.values(KEYS).forEach(k => localStorage.removeItem(k)); location.reload(); } };
+    row("Danger zone", wipe);
+    const save = () => {
+      settings.theme = theme.value; settings.accent = accent.value; settings.fontScale = parseFloat(fs.value) || 1;
+      settings.defaultSep = sep.value || ", "; settings.randomCount = Math.max(1, parseInt(rnd.value) || 10); settings.confirmDelete = conf.checked;
+      settings.backupsKeep = Math.max(1, Math.min(5, parseInt(keep.value) || 3)); settings.backupIntervalMin = Math.max(0, parseInt(intv.value) || 0);
+      saveSettings(); applyTheme(); close(); showToast("Settings saved");
+    };
+    const reset = el("button", "btn btn-ghost tall left", "Reset defaults"); reset.onclick = () => { if (confirmDlg("Reset all settings to defaults?")) { settings = Object.assign({}, DEFAULT_SETTINGS); saveSettings(); applyTheme(); close(); } };
+    foot.append(reset, Object.assign(el("button", "btn btn-ghost tall", "Cancel"), { onclick: close }), Object.assign(el("button", "btn btn-acc", "Save"), { onclick: save }));
+  } });
+}
+function openDuplicates() {
+  const groups = {};
+  for (const cat of cats()) for (const p of data[cat]) { const k = p.text.trim().toLowerCase().replace(/\s+/g, " "); (groups[k] = groups[k] || []).push({ cat, p }); }
+  let dups = Object.values(groups).filter(g => g.length > 1);
+  openModal({ title: "Duplicate Finder", hint: dups.length ? `${dups.length} groups · ${dups.reduce((s, g) => s + g.length - 1, 0)} redundant` : "no duplicates 🎉", width: 880, build: ({ body, foot, close }) => {
+    const list = el("div", "list-box"); list.style.minHeight = "380px"; body.appendChild(list);
+    const render = () => {
+      dups = dups.map(g => g.filter(({ cat, p }) => (data[cat] || []).some(x => x.id === p.id))).filter(g => g.length > 1);
+      list.innerHTML = ""; if (!dups.length) { list.innerHTML = '<p class="empty-msg" style="margin-top:40px">No duplicates.</p>'; return; }
+      for (const g of dups) {
+        const box = el("div", "card"); box.style.marginBottom = "8px"; box.appendChild(el("div", "card-text", g[0].p.text)).style.cursor = "default";
+        for (const { cat, p } of g) {
+          const r = el("div", "card-header"); r.appendChild(el("span", "chip purp", cat)); r.appendChild(el("span", "hint", `${p.fav ? "★  " : ""}used ${p.uses || 0}×  ·  ${plural(p.tags.length, "tag")}`));
+          const d = el("button", "btn btn-ghost danger", "Delete"); d.style.marginLeft = "auto"; d.onclick = () => { deletePrompts([p.id], false); render(); }; r.appendChild(d); box.appendChild(r);
+        }
+        list.appendChild(box);
+      }
+    };
+    render();
+    const auto = el("button", "btn btn-red", "Auto-clean"); auto.onclick = () => {
+      const ids = [];
+      for (const g of dups) { const keep = g.slice().sort((a, b) => (b.p.fav - a.p.fav) || ((b.p.uses || 0) - (a.p.uses || 0)) || (b.p.tags.length - a.p.tags.length))[0]; ids.push(...g.filter(x => x !== keep).map(x => x.p.id)); }
+      if (ids.length && confirmDlg(`Delete ${ids.length} duplicates (keeps starred / most used)?`)) { deletePrompts(ids, false); render(); }
+    };
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }), auto);
+  } });
+}
+function openTrash() {
+  openModal({ title: `Trash  —  ${trash.length} items`, width: 860, build: ({ body, foot, close, m }) => {
+    const list = el("div", "list-box"); list.style.minHeight = "380px"; body.appendChild(list);
+    const render = () => {
+      m.querySelector(".modal-title").textContent = `Trash  —  ${trash.length} items`; list.innerHTML = "";
+      if (!trash.length) { list.innerHTML = '<p class="empty-msg" style="margin-top:40px">Trash is empty.</p>'; return; }
+      for (const e of trash) {
+        const c = el("div", "card"); c.style.marginBottom = "6px"; const h = el("div", "card-header");
+        h.appendChild(el("span", "chip purp", e.cat)); h.appendChild(el("span", "hint", fmtTs(e.deleted)));
+        const btns = el("div", "card-btns");
+        const rs = el("button", "btn btn-ghost acc", "Restore"); rs.onclick = () => {
+          const cat = e.cat in data ? e.cat : (selected || cats()[0]); if (!cat) { data[e.cat] = []; }
+          const target = cat || e.cat; const p = normalizePrompt(e.prompt); if (data[target].some(x => x.id === p.id)) p.id = uid();
+          data[target].push(p); trash.splice(trash.indexOf(e), 1); saveTrash(); saveData(); refresh(); render(); showToast(`Restored to "${target}"`);
+        };
+        const x = el("button", "btn btn-ghost danger", "✕"); x.onclick = () => { trash.splice(trash.indexOf(e), 1); saveTrash(); render(); };
+        btns.append(rs, x); h.appendChild(btns); const t = el("div", "card-text", e.prompt.text || ""); t.style.cursor = "default"; c.append(h, el("div", "card-divider"), t); list.appendChild(c);
+      }
+    };
+    render();
+    const empty = el("button", "btn btn-red", "Empty trash"); empty.onclick = () => { if (trash.length && confirmDlg("Empty trash permanently?")) { trash = []; saveTrash(); render(); } };
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }), empty);
+  } });
+}
+function openBackups() {
+  const backups = listBackups();
+  openModal({ title: "Restore Backup", hint: "stored in this browser", width: 720, build: ({ body, foot, close }) => {
+    if (!backups.length) body.appendChild(el("p", "empty-msg", "No backups yet."));
+    for (const b of backups) {
+      let parsed = null; try { parsed = JSON.parse(b.data); } catch {}
+      const n = parsed && parsed.categories ? Object.values(parsed.categories).reduce((s, l) => s + l.length, 0) : 0;
+      const c = el("div", "card"); c.style.marginBottom = "6px"; const h = el("div", "card-header");
+      h.appendChild(el("span", "card-title", fmtTs(b.ts))); h.appendChild(el("span", "hint", parsed ? `${n} prompts · ${Object.keys(parsed.categories || {}).length} categories · ${(b.data.length / 1024).toFixed(0)} KB` : "unreadable"));
+      const r = el("button", "btn btn-ghost acc", "Restore"); r.style.marginLeft = "auto";
+      r.onclick = () => { if (!parsed || !confirmDlg("Replace current prompts with this backup?\n(a backup of the current state is written first)")) return; maybeBackup(true); data = {}; for (const [k, l] of Object.entries(parsed.categories || {})) data[k] = (l || []).map(normalizePrompt); saveData(false); renderSidebar(); selectCat(cats()[0] || null); close(); showToast("Backup restored"); };
+      h.appendChild(r); c.appendChild(h); body.appendChild(c);
     }
+    const now = el("button", "btn btn-acc", "Backup now"); now.onclick = () => { maybeBackup(true); close(); openBackups(); };
+    foot.append(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }), now);
+  } });
+}
+function openStats() {
+  const total = cats().reduce((s, c) => s + data[c].length, 0), favs = cats().reduce((s, c) => s + data[c].filter(p => p.fav).length, 0);
+  const tags = new Set(cats().flatMap(c => data[c].flatMap(p => p.tags)));
+  const used = cats().flatMap(c => data[c]).filter(p => p.uses).sort((a, b) => b.uses - a.uses).slice(0, 10);
+  openModal({ title: "Statistics", width: 680, build: ({ body, foot, close }) => {
+    body.appendChild(el("div", "stat", `${cats().length} categories · ${total} prompts · ${favs} favorites · ${tags.size} tags\n${history.length} history entries · ${trash.length} in trash · ${listBackups().length} backups`)).style.whiteSpace = "pre-line";
+    body.appendChild(el("div", "lbl-sec", "MOST USED"));
+    if (!used.length) body.appendChild(el("div", "lbl", "Nothing copied yet."));
+    for (const p of used) { const r = el("div", "pick-item", `${p.uses}×   ${p.text.slice(0, 100)}`); r.style.cursor = "default"; body.appendChild(r); }
+    foot.appendChild(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }));
+  } });
+}
+const SHORTCUTS = [["Ctrl+N", "New prompt"], ["Ctrl+Shift+N", "New category"], ["Ctrl+F", "Search"], ["Esc", "Clear search / close dialog"], ["Ctrl+A", "Select all visible prompts"], ["Delete", "Delete selected prompts"], ["Ctrl+C", "Copy selected prompts / builder result"], ["Ctrl+Z", "Undo delete"], ["Ctrl+1 … 9", "Jump to category"], ["Ctrl+L / Ctrl+B", "Library / Builder"], ["Space", "Builder: randomize"], ["Ctrl+Enter", "Editor: save"], ["Ctrl+,", "Settings"], ["Ctrl+D / Ctrl+T", "Duplicates / Trash"], ["F1", "This help"]];
+function openShortcuts() {
+  openModal({ title: "Keyboard Shortcuts", width: 520, build: ({ body, foot, close }) => {
+    const t = el("table", "t"); for (const [k, d] of SHORTCUTS) { const tr = el("tr"); const td1 = el("td"); td1.innerHTML = `<kbd>${escHtml(k)}</kbd>`; tr.append(td1, el("td", "", d)); t.appendChild(tr); } body.appendChild(t);
+    foot.appendChild(Object.assign(el("button", "btn btn-ghost tall", "Close"), { onclick: close }));
+  } });
+}
+
+// ══ IMPORT / EXPORT ═════════════════════════════════════════════════
+function openExportMenu(e) {
+  const x = e.clientX || innerWidth / 2, y = e.clientY || 80;
+  const items = [
+    { label: "Full backup (.json — prompts, templates, rules, history)", action: () => downloadText("promptvault_backup.json", JSON.stringify({ version: 2, app: "PromptVault", exported: nowIso(), categories: data, templates, rules, history }, null, 2), "application/json") },
+    { label: "Prompts only, plain (.json — {category: [text]})", action: () => downloadText("promptvault_export.json", JSON.stringify(Object.fromEntries(cats().map(c => [c, data[c].map(p => p.text)])), null, 2), "application/json") },
+    { label: "CSV (category, text, tags, title, note)", action: exportCsv },
+    { sep: true },
+    { label: "Wildcards — one .txt per category (multiple downloads)", action: () => exportWildcards(cats()) },
+  ];
+  if (selected) items.push({ label: `Wildcard "${selected}" only (.txt)`, action: () => exportWildcards([selected]) });
+  openPopMenu(x, y, items, "EXPORT");
+}
+function csvCell(v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function exportCsv() {
+  const rows = [["category", "text", "tags", "title", "note", "weight", "fav", "uses"]];
+  for (const c of cats()) for (const p of data[c]) rows.push([c, p.text, p.tags.join(", "), p.title, p.note, p.weight, p.fav ? 1 : 0, p.uses || 0]);
+  downloadText("promptvault.csv", rows.map(r => r.map(csvCell).join(",")).join("\n"), "text/csv"); showToast("CSV exported");
+}
+function exportWildcards(cs) {
+  let n = 0;
+  cs.forEach((c, i) => { if (!data[c].length) return; setTimeout(() => downloadText(safeName(c) + ".txt", data[c].map(p => p.text).join("\n") + "\n"), i * 350); n++; });
+  showToast(n === 1 ? "Wildcard written" : `${n} wildcard files — allow multiple downloads if asked`);
+}
+function importFile() { $("file-input").value = ""; $("file-input").click(); }
+function parseCsv(text) {
+  const rows = [], row = []; let cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === "," || ch === ";") { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row.splice(0)); cell = ""; }
+    else cell += ch;
   }
-  slots.forEach(s => rollSlot(s));
-  renderSlots();
-  recordHistory();
-  showToast(missing
-    ? `Template loaded — ${missing} missing categor${missing !== 1 ? "ies" : "y"} skipped`
-    : `Template "${name}" loaded`);
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()));
 }
-
-// ── Export / Import ───────────────────────────────────────────────────────────
-
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href     = url;
-  a.download = "promptvault_backup.json";
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast("Exported!");
-}
-
-function importJSON() {
-  document.getElementById("file-input").value = "";
-  document.getElementById("file-input").click();
-}
-
 function handleImport(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
+    const text = String(ev.target.result).replace(/^﻿/, "");
+    let incoming = {}, tpl = null, rl = null;
+    const isJson = /\.json$/i.test(file.name) || /^\s*[\[{]/.test(text);
     try {
-      const imported = JSON.parse(ev.target.result);
-      if (typeof imported !== "object" || Array.isArray(imported))
-        throw new Error("Invalid format");
-
-      const merged = { ...data };
-      for (const cat of Object.keys(imported)) {
-        if (!Array.isArray(imported[cat])) continue;
-        // merge: unbekannte Kategorien anlegen, doppelte Prompts überspringen
-        if (!Array.isArray(merged[cat])) merged[cat] = [];
-        const existing = new Set(merged[cat]);
-        for (const p of imported[cat]) {
-          if (typeof p === "string" && !existing.has(p)) {
-            merged[cat].push(p);
-            existing.add(p);
-          }
-        }
+      if (isJson) {
+        const raw = JSON.parse(text);
+        if (Array.isArray(raw)) { const cat = selected || prompt("Import into category:", cats()[0] || "Imported"); if (!cat) return; incoming[cat] = raw.filter(p => typeof p === "string" || (p && typeof p === "object")).map(normalizePrompt); }
+        else if (raw && raw.version === 2 && raw.categories) { for (const [c, l] of Object.entries(raw.categories)) if (Array.isArray(l)) incoming[c] = l.map(normalizePrompt); tpl = raw.templates && typeof raw.templates === "object" ? raw.templates : null; rl = Array.isArray(raw.rules) ? raw.rules : null; }
+        else if (raw && typeof raw === "object") { for (const [c, l] of Object.entries(raw)) if (Array.isArray(l)) incoming[c] = l.filter(p => typeof p === "string" || (p && typeof p === "object")).map(normalizePrompt); }
+        else throw new Error("format");
+      } else {
+        const cat = selected || prompt("Import into category:", cats()[0] || "Imported"); if (!cat) return;
+        const first = (text.split("\n")[0] || "").toLowerCase().replace(/\s/g, "");
+        if ((first.includes(",") || first.includes(";")) && /category|kategorie|text|prompt/.test(first)) {
+          const rows = parseCsv(text), head = rows.shift().map(h => h.trim().toLowerCase());
+          const col = n => head.indexOf(n);
+          for (const r of rows) { const c = (col("category") >= 0 && r[col("category")]) || (col("kategorie") >= 0 && r[col("kategorie")]) || cat; const t = (col("text") >= 0 && r[col("text")]) || (col("prompt") >= 0 && r[col("prompt")]); if (!t) continue; (incoming[c.trim()] = incoming[c.trim()] || []).push(makePrompt(t, { tags: col("tags") >= 0 ? r[col("tags")] || "" : "", title: col("title") >= 0 ? r[col("title")] || "" : "", note: col("note") >= 0 ? r[col("note")] || "" : "" })); }
+        } else incoming[cat] = text.split("\n").map(l => l.trim()).filter(Boolean).map(t => makePrompt(t));
       }
-      data = merged;
-      saveData(data);
-      refresh();
-      showToast("Imported!");
-    } catch {
-      alert("Invalid JSON file. Please use a PromptVault backup.");
+    } catch { alert("Could not read this file. Use a PromptVault JSON export, a .txt with one prompt per line, or a CSV with a header row."); return; }
+    let added = 0, skipped = 0, newCats = 0;
+    const allIds = new Set(cats().flatMap(c => data[c].map(p => p.id)));
+    for (const [cat, list] of Object.entries(incoming)) {
+      if (!(cat in data)) { data[cat] = []; newCats++; }
+      for (const p of list) { if (!p.text) continue; if (isDup(cat, p.text)) { skipped++; continue; } if (allIds.has(p.id)) p.id = uid(); allIds.add(p.id); data[cat].push(p); added++; }
     }
+    let tplN = 0;
+    if (tpl) { for (const [n, t] of Object.entries(tpl)) if (!(n in templates)) { templates[n] = t; tplN++; } saveTemplates(); }
+    if (rl) for (const r of rl) if (!rules.some(x => JSON.stringify(x) === JSON.stringify(r))) rules.push(r);
+    saveData(); renderSidebar(); if (!selected && cats().length) selectCat(cats()[0]); else refresh();
+    alert(`${plural(added, "prompt")} added\n${plural(skipped, "duplicate")} skipped\n${newCats} new categor${newCats !== 1 ? "ies" : "y"}` + (tplN ? `\n${plural(tplN, "template")} added` : ""));
   };
   reader.readAsText(file);
 }
 
-// ── Copy / Toast ──────────────────────────────────────────────────────────────
-
-function copyText(text) {
-  navigator.clipboard.writeText(text)
-    .then(() => showToast("Copied!"))
-    .catch(() => {
-      const ta = document.createElement("textarea");
-      ta.value = text; document.body.appendChild(ta);
-      ta.select(); document.execCommand("copy");
-      document.body.removeChild(ta);
-      showToast("Copied!");
-    });
-}
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
-}
-
-// ── Keyboard shortcuts ────────────────────────────────────────────────────────
-
-function isTyping(e) { return e.target.matches("input, textarea, select"); }
-function overlayOpen() {
-  return [...document.querySelectorAll(".overlay")].some(o => !o.classList.contains("hidden"));
-}
-
+// ══ SHORTCUTS ═══════════════════════════════════════════════════════
+const isTyping = e => e.target.matches("input, textarea, select");
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    closeEditor(); closeRandom(); closeNameModal(); closeCtxMenu();
-    closePopMenu(); closePick(); closeHistory();
-    return;
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === "Enter" &&
-      !document.getElementById("editor-overlay").classList.contains("hidden")) { saveEditor(); return; }
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !isTyping(e)) {
-    e.preventDefault();
-    undo();
-    return;
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f" && !isTyping(e)) {
-    e.preventDefault();
-    switchView("library");
-    document.getElementById("search").focus();
-    return;
-  }
-  if (e.key === " " && activeView === "builder" && !isTyping(e) && !overlayOpen()) {
-    e.preventDefault();
-    randomizeAll();
-    return;
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c" &&
-      activeView === "builder" && !isTyping(e) && !overlayOpen() &&
-      !window.getSelection().toString()) {
-    copyResult();
-  }
+  const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+  if (e.key === "Escape") { if (modalOpen()) closeModal(); else if ($("search").value) { $("search").value = ""; renderPrompts(); } else if (selection.size) { selection.clear(); renderPrompts(); } closePopMenu(); return; }
+  if (e.key === "F1") { e.preventDefault(); if (!modalOpen()) openShortcuts(); return; }
+  if (modalOpen()) return;
+  if (mod && k === "z" && !isTyping(e)) { e.preventDefault(); undo(); return; }
+  if (mod && k === "f") { e.preventDefault(); switchView("library"); $("search").focus(); return; }
+  if (isTyping(e)) return;
+  if (mod && k === "n") { e.preventDefault(); if (e.shiftKey) newCategory(); else { switchView("library"); addPrompt(); } return; }
+  if (mod && k === "a" && activeView === "library") { e.preventDefault(); selectAllVisible(); return; }
+  if (e.key === "Delete" && activeView === "library" && selection.size) { deletePrompts([...selection]); return; }
+  if (mod && k === "c" && !window.getSelection().toString()) { if (activeView === "builder") copyResult(); else if (selection.size) copyPrompts([...selection]); return; }
+  if (mod && k === "l") { e.preventDefault(); switchView("library"); return; }
+  if (mod && k === "b") { e.preventDefault(); switchView("builder"); return; }
+  if (mod && e.key === ",") { e.preventDefault(); openSettings(); return; }
+  if (mod && k === "d") { e.preventDefault(); openDuplicates(); return; }
+  if (mod && k === "t") { e.preventDefault(); openTrash(); return; }
+  if (mod && /^[1-9]$/.test(e.key)) { const c = sortedCats()[parseInt(e.key) - 1]; if (c) { e.preventDefault(); switchView("library"); selectCat(c); } return; }
+  if (e.key === " " && activeView === "builder") { e.preventDefault(); randomizeAll(); }
 });
-
-document.getElementById("name-input").addEventListener("keydown", e => {
-  if (e.key === "Enter") saveNameModal();
-});
-
-// Suche entprellt: erst rendern, wenn 200 ms nicht mehr getippt wurde
 let searchTimer;
-document.getElementById("search").addEventListener("input", () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(renderPrompts, 200);
-});
+$("search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderPrompts, 200); });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ══ INIT ════════════════════════════════════════════════════════════
+applyTheme();
+$("sort-sel").value = settings.promptSort || "manual";
+$("sep-input").value = settings.defaultSep || ", ";
+restoreBuilderState();
 renderSidebar();
 selectCat(cats()[0] || null);
+window.addEventListener("beforeunload", () => { clearTimeout(stateTimer); writeJSON(KEYS.state, { slots, rules, sep: $("sep-input").value, template: activeTemplate, wildcard: $("wild-chk").checked }); });
 </script>
 </body>
 </html>

@@ -1,1 +1,4 @@
 customtkinter>=5.2.0
+pillow>=10.0
+# optional
+pystray>=0.19       # system tray

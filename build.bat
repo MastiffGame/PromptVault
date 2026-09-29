@@ -11,7 +11,7 @@ if %errorlevel% neq 0 (
 )
 
 echo [1/3] Abhaengigkeiten installieren...
-pip install customtkinter pillow pyinstaller --quiet
+pip install customtkinter pillow pystray pyinstaller --quiet
 
 echo [2/3] Icon generieren...
 python create_icon.py
@@ -19,6 +19,8 @@ python create_icon.py
 echo [3/3] Desktop-App bauen...
 python -m PyInstaller --noconfirm --onefile --windowed ^
     --collect-data customtkinter ^
+    --hidden-import pystray._win32 ^
+    --hidden-import PIL._tkinter_finder ^
     --name "PromptVault" ^
     --icon icon.ico ^
     main.py

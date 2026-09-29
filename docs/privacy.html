@@ -140,7 +140,7 @@
   <div class="logo-sub">Image Generation</div>
 
   <h1>Privacy Policy</h1>
-  <div class="updated">Last updated: 14 June 2026</div>
+  <div class="updated">Last updated: 29 September 2026</div>
 
   <p>
     PromptVault is a free, private, non-commercial hobby project. It is a
@@ -187,18 +187,30 @@
       <tr><th>Key</th><th>Contents</th></tr>
     </thead>
     <tbody>
-      <tr><td><span class="key">promptvault_data</span></td><td>Your categories and the prompts within them.</td></tr>
-      <tr><td><span class="key">promptvault_data_backup</span></td><td>An automatic backup copy of the previous version of your data.</td></tr>
-      <tr><td><span class="key">promptvault_favs</span></td><td>Your favorite prompts, grouped by category.</td></tr>
-      <tr><td><span class="key">promptvault_templates</span></td><td>Templates you save in the Builder.</td></tr>
+      <tr><td><span class="key">promptvault_v2</span></td><td>Your categories and prompts, including any title, tags, note, weight, favorite flag, usage counter and timestamps you create (format version 2, identical to the desktop app).</td></tr>
+      <tr><td><span class="key">promptvault_backups</span></td><td>Up to five automatic snapshots of the entry above, written at most every few minutes. Deleted prompts may still be contained in a snapshot until it rotates out.</td></tr>
+      <tr><td><span class="key">promptvault_trash</span></td><td>Deleted prompts, so they can be restored (up to 200 entries).</td></tr>
+      <tr><td><span class="key">promptvault_history</span></td><td>Results generated in the Builder, with a timestamp (up to 100 entries plus pinned ones).</td></tr>
+      <tr><td><span class="key">promptvault_templates_v2</span></td><td>Templates and rules you save in the Builder.</td></tr>
+      <tr><td><span class="key">promptvault_builder_state</span></td><td>The current Builder slots, separator and rules, so they survive a reload.</td></tr>
+      <tr><td><span class="key">promptvault_settings</span></td><td>Theme, accent color, font size and similar preferences.</td></tr>
+      <tr><td><span class="key">promptvault_data</span>, <span class="key">promptvault_data_backup</span>, <span class="key">promptvault_favs</span>, <span class="key">promptvault_templates</span></td><td>Entries from the previous version. They are read once for migration and then left untouched as a safety copy.</td></tr>
     </tbody>
   </table>
   <div class="note">
-    This data stays on your device. You can delete it at any time by clearing
+    This data stays on your device. You can delete it at any time with
+    <em>Settings &rarr; Delete all local data</em> inside the app, by clearing
     your browser's site data / localStorage for this page, or by using your
     browser's settings. Using the app in a private/incognito window means the
-    data is removed when you close that window.
+    data is removed when you close that window. Note that browsers may
+    synchronise site data between your own devices if you have enabled such a
+    feature in the browser itself.
   </div>
+  <p>
+    Copying a prompt places its text in your device's clipboard. What happens
+    with the clipboard afterwards (for example a clipboard history or cloud
+    clipboard) is controlled by your operating system, not by this app.
+  </p>
   <p>
     The Import and Export functions read and write a JSON file <em>locally</em>
     on your device only. Exporting or importing does not send anything over the

@@ -8,10 +8,10 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-python -c "import customtkinter" >nul 2>&1
+python -c "import customtkinter, PIL" >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Installiere customtkinter...
-    pip install customtkinter
+    echo Installiere Abhaengigkeiten...
+    pip install -r requirements.txt
 )
 
 python main.py

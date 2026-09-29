@@ -9,9 +9,19 @@ __pycache__/
 
 # User data
 prompts.json
+prompts.json.corrupt.*
 prompts_backup.json
+prompts_v1_backup.json
 builder_templates.json
+builder_state.json
+builder_rules.json
 favorites.json
+history.json
+trash.json
+settings.json
+backups/
+images/
+outputs/
 
 # IDE / tools
 .claude/
