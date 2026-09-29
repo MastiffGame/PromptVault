@@ -121,6 +121,14 @@ automatically on first start; the original is kept as `prompts_v1_backup.json`.
 | `storage.py` | files, migration, backups, settings |
 | `theme.py`, `widgets.py` | colors, fonts, DPI scaling, reusable widgets |
 
+## License
+
+PromptVault is released under the MIT License, see `LICENSE`. Third-party components:
+customtkinter (CC0 1.0), Pillow (MIT-CMU), PyInstaller (GPL 2.0 with bootloader exception, build
+tool only), and the optional `pystray` (LGPL 3.0). The Windows build bundles `pystray`; you can rebuild
+the executable with a modified copy of that library from this repository using `build.bat`.
+See `CHANGELOG.md` for release notes.
+
 ## Web version
 
 `docs/index.html` is a single-file browser version with the same feature set, minus what a browser
