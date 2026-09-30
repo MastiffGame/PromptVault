@@ -1,13 +1,46 @@
 """Builder-Ansicht: Slots, Regeln, Ergebnis, Batch, History und Templates."""
 
+import json
+import os
 import random
+import shutil
 import tkinter as tk
 from tkinter import messagebox, filedialog
 
 from storage import make_prompt, now_iso, estimate_tokens, prompt_all_texts
 from theme import C, F, px
 from widgets import (ghost_btn, neon_btn, flat_btn, chip, styled_menu, entry, option_menu,
-                     checkbox, slider, ScrollFrame, Overlay, DragReorder, fmt_ts, Tooltip)
+                     checkbox, slider, ScrollFrame, Overlay, DragReorder, fmt_ts, Tooltip,
+                     make_textbox, textbox_set, textbox_get)
+
+# Schnellfelder im Workflow-Dialog: (Label, Knoten-Prädikat, Input-Name)
+WF_QUICK = [
+    ("Images per job", lambda ct, ins: "batch_size" in ins, "batch_size"),
+    ("Width", lambda ct, ins: "batch_size" in ins and "width" in ins, "width"),
+    ("Height", lambda ct, ins: "batch_size" in ins and "height" in ins, "height"),
+    ("Steps", lambda ct, ins: ct.startswith("KSampler"), "steps"),
+    ("CFG", lambda ct, ins: ct.startswith("KSampler"), "cfg"),
+    ("Sampler", lambda ct, ins: ct.startswith("KSampler"), "sampler_name"),
+    ("Scheduler", lambda ct, ins: ct.startswith("KSampler"), "scheduler"),
+    ("Denoise", lambda ct, ins: ct.startswith("KSampler"), "denoise"),
+    ("Checkpoint", lambda ct, ins: "ckpt_name" in ins, "ckpt_name"),
+]
+
+
+def wf_coerce(orig, text):
+    """Wandelt Eingabetext in den Typ des Originalwerts; wirft ValueError."""
+    text = text.strip()
+    if isinstance(orig, bool):
+        if text.lower() in ("1", "true", "yes", "on"):
+            return True
+        if text.lower() in ("0", "false", "no", "off"):
+            return False
+        raise ValueError("true/false expected")
+    if isinstance(orig, int):
+        return int(float(text))
+    if isinstance(orig, float):
+        return float(text)
+    return text
 
 
 def new_slot(kind="cat", cat="", text=""):
@@ -85,6 +118,10 @@ class BuilderMixin:
         self._rules_btn = ghost_btn(right_grp, "Rules", self._open_rules,
                                     width=70, height=34, font_size=12)
         self._rules_btn.pack(side="right", pady=16, padx=(6, 0))
+        self._wf_btn = ghost_btn(right_grp, "Workflow", self._open_workflow,
+                                 width=84, height=34, font_size=12)
+        self._wf_btn.pack(side="right", pady=16, padx=(6, 0))
+        Tooltip(self._wf_btn, "Edit values of the ComfyUI workflow (images per job, steps, …)")
         self._tpl_btn = ghost_btn(right_grp, "Templates", self._builder_templates_menu,
                                   width=92, height=34, font_size=12)
         self._tpl_btn.pack(side="right", pady=16, padx=(6, 0))
@@ -156,9 +193,11 @@ class BuilderMixin:
         self._slot_list.clear()
         self._slot_drag.reset()
         n = len(self._slots)
+        n_ov = sum(len(v) for v in (self._wf_overrides or {}).values())
         self._slot_count_lbl.configure(text=f"{n} Slot{'s' if n != 1 else ''}"
                                        + (f"  ·  {len(self._rules)} rule{'s' if len(self._rules) != 1 else ''}"
-                                          if self._rules else ""))
+                                          if self._rules else "")
+                                       + (f"  ·  {n_ov} workflow override{'s' if n_ov != 1 else ''}" if n_ov else ""))
         self._roll_btn.configure(state="normal" if n else "disabled")
         self._tpl_name_lbl.configure(text=f"⌘ {self._active_template}" if self._active_template else "")
 
@@ -656,6 +695,19 @@ class BuilderMixin:
         checkbox(ctrl, "unique only", uniq).pack(side="left")
         info = tk.Label(ctrl, text="", fg=C.TXT2, bg=C.SURF, font=F(10))
         info.pack(side="left", padx=12)
+        est = tk.Label(ctrl, text="", fg=C.GREEN, bg=C.SURF, font=F(10))
+        est.pack(side="left", padx=4)
+
+        def update_est():
+            k = len(results["list"])
+            if not k or not self.store.get("sd.url"):
+                est.configure(text="")
+                return
+            if self.store.get("sd.backend") == "comfy":
+                ipj = self._comfy_images_per_job()
+                est.configure(text=f"→ {k} job{'s' if k != 1 else ''} × {ipj} image{'s' if ipj != 1 else ''} = {k * ipj} images")
+            else:
+                est.configure(text=f"→ {k} job{'s' if k != 1 else ''}")
         res = ScrollFrame(ov.body, bg=C.BG)
         res.pack(fill="both", expand=True)
         results = {"list": []}
@@ -696,6 +748,7 @@ class BuilderMixin:
             for b in (copy_btn, save_btn, exp_btn):
                 b.configure(state="normal" if out else "disabled")
             send_btn.configure(state="normal" if out and self.store.get("sd.url") else "disabled")
+            update_est()
 
         neon_btn(ctrl, "Generate", generate, color=C.PURP, bg=C.PURP_DIM, hover=C.PURP_MID,
                  width=110, height=32, font_size=12).pack(side="right")
@@ -914,7 +967,8 @@ class BuilderMixin:
             else:
                 slots.append({k: s[k] for k in ("type", "cat", "weight", "count_min", "count_max",
                                                 "negative", "tag_filter")})
-        return {"slots": slots, "rules": [dict(r) for r in self._rules]}
+        return {"slots": slots, "rules": [dict(r) for r in self._rules],
+                "wf_overrides": json.loads(json.dumps(self._wf_overrides or {}))}
 
     def _builder_templates_menu(self):
         menu = styled_menu(self)
@@ -961,6 +1015,7 @@ class BuilderMixin:
             return
         self._slots = [normalize_slot(s) for s in t.get("slots", [])]
         self._rules = [dict(r) for r in t.get("rules", [])]
+        self._wf_overrides = t.get("wf_overrides") if isinstance(t.get("wf_overrides"), dict) else {}
         for s in self._slots:
             if s["type"] == "cat":
                 self._roll_slot(s)
@@ -1009,7 +1064,7 @@ class BuilderMixin:
         try:
             self.store.save_state({"slots": self._slots, "rules": self._rules,
                                    "sep": self._sep_var.get(), "template": self._active_template,
-                                   "wildcard": self._wild_var.get()})
+                                   "wildcard": self._wild_var.get(), "wf_overrides": self._wf_overrides})
         except OSError:
             pass
 
@@ -1017,5 +1072,217 @@ class BuilderMixin:
         st = self.store.load_state()
         self._slots = [normalize_slot(s) for s in st.get("slots", []) if isinstance(s, dict)]
         self._rules = [r for r in st.get("rules", []) if isinstance(r, dict)]
+        self._wf_overrides = st.get("wf_overrides") if isinstance(st.get("wf_overrides"), dict) else {}
         self._active_template = st.get("template") or None
         return st
+
+    # ═══════════════════════════════════════════════════════════════
+    # COMFYUI-WORKFLOW BEARBEITEN
+    # ═══════════════════════════════════════════════════════════════
+
+    def _wf_load(self):
+        """(pfad, text, dict) der hinterlegten Workflow-Datei oder None nach Hinweis."""
+        if self.store.get("sd.backend") != "comfy" or not self.store.get("sd.url"):
+            if messagebox.askyesno("Workflow", "The workflow editor needs the ComfyUI backend.\n"
+                                               "Open Settings to configure it?", parent=self):
+                self._open_settings()
+            return None
+        path = self.store.get("sd.workflow", "")
+        if not path or not os.path.exists(path):
+            if messagebox.askyesno("Workflow", "No workflow file is set.\nOpen Settings to choose one?", parent=self):
+                self._open_settings()
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                text = f.read()
+            wf = self.wf_parse(text)
+            if not isinstance(wf, dict):
+                raise ValueError("not an API-format workflow (expected an object of nodes)")
+        except (OSError, ValueError, json.JSONDecodeError) as e:
+            messagebox.showerror("Workflow", f"Could not read the workflow:\n{e}", parent=self)
+            return None
+        return path, text, wf
+
+    def _open_workflow(self):
+        loaded = self._wf_load()
+        if not loaded:
+            return
+        path, text, wf_file = loaded
+        ov = Overlay(self, 940, 720, title="ComfyUI Workflow", hint=os.path.basename(path))
+        mode = {"raw": False}
+        fields = []          # (nid, key, orig, var)
+        raw_tb = {"tb": None}
+
+        top = tk.Frame(ov.body, bg=C.SURF)
+        top.pack(fill="x", pady=(0, 6))
+        status = tk.Label(top, text="", fg=C.TXT2, bg=C.SURF, font=F(10))
+        status.pack(side="left")
+        raw_btn = flat_btn(top, "Raw JSON", lambda: switch(True), fg=C.TXT2, bg=C.SURF, hover=C.SURF3)
+        raw_btn.pack(side="right", padx=2)
+        fields_btn = flat_btn(top, "Fields", lambda: switch(False), fg=C.ACC, bg=C.SURF, hover=C.SURF3)
+        fields_btn.pack(side="right", padx=2)
+        content = tk.Frame(ov.body, bg=C.SURF)
+        content.pack(fill="both", expand=True)
+
+        def effective_value(nid, key):
+            ov_ = (self._wf_overrides or {}).get(nid, {})
+            return ov_.get(key, wf_file[nid]["inputs"][key])
+
+        def update_status():
+            n_ov = sum(len(v) for v in (self._wf_overrides or {}).values())
+            status.configure(text=(f"{n_ov} session override{'s' if n_ov != 1 else ''} active (file unchanged)"
+                                   if n_ov else "no overrides — values are the file's values"),
+                             fg=C.GOLD if n_ov else C.TXT2)
+
+        def add_field(parent, nid, key, orig, label=None, note=None):
+            row = tk.Frame(parent, bg=C.SURF2)
+            row.pack(fill="x", padx=8, pady=2)
+            tk.Label(row, text=label or key, fg=C.TXT2, bg=C.SURF2, font=F(10), width=18, anchor="w").pack(side="left")
+            if self.wf_is_placeholder(orig) or isinstance(orig, list):
+                tk.Label(row, text=str(orig) if not isinstance(orig, list) else f"→ link to node {orig[0]}",
+                         fg=C.PURP if not isinstance(orig, list) else C.TXT3, bg=C.SURF2, font=F(10, mono=True)).pack(side="left")
+                return
+            var = tk.StringVar(value=str(effective_value(nid, key)))
+            width = 320 if isinstance(orig, str) else 110
+            entry(row, var, width=width, height=28).pack(side="left")
+            tk.Label(row, text=note or f"file: {orig}", fg=C.TXT3, bg=C.SURF2, font=F(9)).pack(side="left", padx=8)
+            fields.append((nid, key, orig, var))
+
+        def build_fields():
+            fields.clear()
+            sf = ScrollFrame(content, bg=C.SURF)
+            sf.pack(fill="both", expand=True)
+            b = sf.inner
+            # Schnellfelder
+            tk.Label(b, text="QUICK SETTINGS", fg=C.ACC, bg=C.SURF, font=F(10, bold=True)).pack(anchor="w", pady=(0, 4))
+            quick = tk.Frame(b, bg=C.SURF2, highlightbackground=C.BORDER, highlightthickness=1)
+            quick.pack(fill="x", pady=(0, 10))
+            found = 0
+            for label, pred, key in WF_QUICK:
+                for nid, node in wf_file.items():
+                    ins = node.get("inputs", {}) if isinstance(node, dict) else {}
+                    ct = str(node.get("class_type", "")) if isinstance(node, dict) else ""
+                    if key in ins and not isinstance(ins[key], list) and pred(ct, ins):
+                        add_field(quick, nid, key, ins[key], label=label, note=f"node {nid} · {ct} · file: {ins[key]}")
+                        found += 1
+                        break
+            if not found:
+                tk.Label(quick, text="No common fields detected in this workflow.", fg=C.TXT2, bg=C.SURF2,
+                         font=F(10)).pack(anchor="w", padx=8, pady=6)
+            # Alle Knoten
+            tk.Label(b, text="ALL NODES", fg=C.ACC, bg=C.SURF, font=F(10, bold=True)).pack(anchor="w", pady=(0, 4))
+            for nid, node in wf_file.items():
+                if not isinstance(node, dict):
+                    continue
+                ins = node.get("inputs", {})
+                title = (node.get("_meta") or {}).get("title", "") if isinstance(node.get("_meta"), dict) else ""
+                box = tk.Frame(b, bg=C.SURF2, highlightbackground=C.BORDER, highlightthickness=1)
+                box.pack(fill="x", pady=3)
+                hdr = tk.Frame(box, bg=C.SURF2)
+                hdr.pack(fill="x", padx=8, pady=(6, 2))
+                tk.Label(hdr, text=f"#{nid}", fg=C.ACC, bg=C.SURF2, font=F(10, bold=True, mono=True)).pack(side="left")
+                tk.Label(hdr, text=str(node.get("class_type", "?")), fg=C.PURP, bg=C.SURF2, font=F(11, bold=True)).pack(side="left", padx=(8, 0))
+                if title and title != node.get("class_type"):
+                    tk.Label(hdr, text=title, fg=C.TXT2, bg=C.SURF2, font=F(10)).pack(side="left", padx=(8, 0))
+                if not isinstance(ins, dict) or not ins:
+                    tk.Label(box, text="(no inputs)", fg=C.TXT3, bg=C.SURF2, font=F(9)).pack(anchor="w", padx=8, pady=(0, 6))
+                    continue
+                for key, val in ins.items():
+                    if isinstance(val, (dict,)):
+                        continue
+                    add_field(box, nid, key, val)
+                tk.Frame(box, height=4, bg=C.SURF2).pack()
+                sf.bind_children_wheel(box)
+            sf.bind_children_wheel(quick)
+
+        def build_raw():
+            tb = make_textbox(content, height=400, font_size=12, highlight=False)
+            tb.pack(fill="both", expand=True)
+            wf_eff = self.wf_apply_overrides(json.loads(json.dumps(wf_file)), self._wf_overrides)
+            textbox_set(tb, json.dumps(wf_eff, indent=2, ensure_ascii=False))
+            raw_tb["tb"] = tb
+            tk.Label(content, text="Shows the file with active overrides applied. Edit freely and use "
+                                   "“Save to file”; “Apply” is not available in raw mode.",
+                     fg=C.TXT3, bg=C.SURF, font=F(9)).pack(anchor="w", pady=(4, 0))
+
+        def switch(raw):
+            mode["raw"] = raw
+            for w in content.winfo_children():
+                w.destroy()
+            raw_tb["tb"] = None
+            fields_btn.configure(fg=C.TXT2 if raw else C.ACC)
+            raw_btn.configure(fg=C.ACC if raw else C.TXT2)
+            (build_raw if raw else build_fields)()
+            update_status()
+
+        def collect():
+            """Liest die Felder; gibt Overrides {nid: {key: value}} zurück oder None bei Fehler."""
+            out = {}
+            for nid, key, orig, var in fields:
+                try:
+                    val = wf_coerce(orig, var.get())
+                except ValueError:
+                    messagebox.showwarning("Workflow", f'Invalid value for "{key}" in node {nid}: {var.get()!r}', parent=self)
+                    return None
+                if val != orig:
+                    out.setdefault(nid, {})[key] = val
+            return out
+
+        def apply():
+            if mode["raw"]:
+                self._toast("Switch to Fields to apply overrides, or use Save to file")
+                return
+            out = collect()
+            if out is None:
+                return
+            self._wf_overrides = out
+            n_ov = sum(len(v) for v in out.values())
+            self._render_slots()
+            update_status()
+            self._toast(f"{n_ov} override{'s' if n_ov != 1 else ''} active for this session")
+
+        def save_file():
+            if mode["raw"]:
+                try:
+                    new_wf = self.wf_parse(textbox_get(raw_tb["tb"]))
+                    if not isinstance(new_wf, dict):
+                        raise ValueError("expected an object of nodes")
+                except (ValueError, json.JSONDecodeError) as e:
+                    messagebox.showerror("Workflow", f"JSON is not valid:\n{e}", parent=self)
+                    return
+            else:
+                out = collect()
+                if out is None:
+                    return
+                new_wf = self.wf_apply_overrides(json.loads(json.dumps(wf_file)), out)
+            if not messagebox.askyesno("Save workflow", f"Write changes to\n{path}\n\nA copy is kept as {os.path.basename(path)}.bak",
+                                       parent=self):
+                return
+            try:
+                shutil.copy2(path, path + ".bak")
+                tmp = path + ".tmp"
+                with open(tmp, "w", encoding="utf-8") as f:
+                    json.dump(new_wf, f, indent=2, ensure_ascii=False)
+                os.replace(tmp, path)
+            except OSError as e:
+                messagebox.showerror("Workflow", f"Could not write file:\n{e}", parent=self)
+                return
+            self._wf_overrides = {}
+            self._render_slots()
+            ov.close()
+            self._toast("Workflow saved, overrides cleared")
+            self._open_workflow()
+
+        def reset():
+            self._wf_overrides = {}
+            self._render_slots()
+            switch(mode["raw"])
+            self._toast("Overrides cleared")
+
+        def reload():
+            ov.close()
+            self._open_workflow()
+
+        ov.buttons(("Apply", apply, "neon"), ("Save to file", save_file, "gold"),
+                   ("Reset overrides", reset, "ghost"), ("Reload", reload, "ghost"))
+        switch(False)

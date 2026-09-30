@@ -32,6 +32,9 @@ except ImportError:          # pragma: no cover
     HAS_TRAY = False
 
 
+WF_PLACEHOLDERS = ("%PROMPT%", "%NEGATIVE%", "%SEED%")
+
+
 class IntegrationsMixin:
 
     # ═══════════════════════════════════════════════════════════════
@@ -121,19 +124,61 @@ class IntegrationsMixin:
                 self._toast("Workflow has no %PROMPT% placeholder")
         return backend, url, wf_text
 
+    # ── Workflow-Helfer (auch vom Builder-Dialog genutzt) ────────
+
     @staticmethod
-    def comfy_workflow(wf_text, prompt, negative, seed=None):
-        """Setzt Platzhalter ein und liefert das Workflow-Dict.
+    def wf_is_placeholder(v):
+        return isinstance(v, str) and any(p in v for p in WF_PLACEHOLDERS)
+
+    @staticmethod
+    def wf_parse(wf_text):
+        """Parst einen API-Workflow; ein nacktes %SEED% wird dafür in einen String gewandelt."""
+        t = wf_text.replace('"%SEED%"', "\u0000S\u0000").replace("%SEED%", '"%SEED%"').replace("\u0000S\u0000", '"%SEED%"')
+        return json.loads(t)
+
+    @staticmethod
+    def wf_apply_overrides(wf, overrides):
+        """Setzt gespeicherte Werte in Knoten-Inputs; Platzhalter und Verknüpfungen bleiben unberührt."""
+        for nid, ins in (overrides or {}).items():
+            node = wf.get(str(nid))
+            if not isinstance(node, dict) or not isinstance(node.get("inputs"), dict) or not isinstance(ins, dict):
+                continue
+            inputs = node["inputs"]
+            for k, v in ins.items():
+                if k in inputs and not isinstance(inputs[k], list) and not IntegrationsMixin.wf_is_placeholder(inputs[k]):
+                    inputs[k] = v
+        return wf
+
+    @staticmethod
+    def comfy_workflow(wf_text, prompt, negative, seed=None, overrides=None):
+        """Wendet Overrides an, setzt Platzhalter ein und liefert das Workflow-Dict.
 
         %PROMPT% / %NEGATIVE% werden JSON-sicher als Text eingesetzt, %SEED% als Zahl
         (funktioniert sowohl als "seed": "%SEED%" als auch als "seed": %SEED%).
         """
         if seed is None:
             seed = random.randint(0, 2 ** 32 - 1)
-        t = wf_text.replace("%PROMPT%", json.dumps(prompt)[1:-1])
+        wf = IntegrationsMixin.wf_apply_overrides(IntegrationsMixin.wf_parse(wf_text), overrides)
+        t = json.dumps(wf)
+        t = t.replace("%PROMPT%", json.dumps(prompt)[1:-1])
         t = t.replace("%NEGATIVE%", json.dumps(negative or "")[1:-1])
-        t = t.replace('"%SEED%"', str(seed)).replace("%SEED%", str(seed))
+        t = t.replace('"%SEED%"', str(seed))
         return json.loads(t)
+
+    def _comfy_images_per_job(self):
+        """batch_size des (ersten) Latent-Knotens nach Overrides, sonst 1."""
+        try:
+            ready = self._sd_ready(quiet=True)
+            if not ready or ready[0] != "comfy":
+                return 1
+            wf = self.wf_apply_overrides(self.wf_parse(ready[2]), getattr(self, "_wf_overrides", {}))
+            for node in wf.values():
+                ins = node.get("inputs", {}) if isinstance(node, dict) else {}
+                if "batch_size" in ins and isinstance(ins["batch_size"], (int, float)):
+                    return max(1, int(ins["batch_size"]))
+        except Exception:      # noqa: BLE001
+            pass
+        return 1
 
     def _sd_send(self, prompt, negative=""):
         self._sd_send_many([(prompt, negative)])
@@ -152,9 +197,10 @@ class IntegrationsMixin:
             return
         backend, url, wf_text = ready
         n = len(items)
+        overrides = dict(getattr(self, "_wf_overrides", {}) or {})
         if backend == "comfy":
             try:
-                self.comfy_workflow(wf_text, items[0][0], items[0][1])
+                self.comfy_workflow(wf_text, items[0][0], items[0][1], overrides=overrides)
             except json.JSONDecodeError as e:
                 self._toast(f"Workflow JSON invalid: {e}")
                 return
@@ -166,7 +212,7 @@ class IntegrationsMixin:
             for i, (prompt, negative) in enumerate(items, 1):
                 try:
                     if backend == "comfy":
-                        payload = {"prompt": self.comfy_workflow(wf_text, prompt, negative),
+                        payload = {"prompt": self.comfy_workflow(wf_text, prompt, negative, overrides=overrides),
                                    "client_id": uuid.uuid4().hex}
                         self._http_json("POST", url + "/prompt", payload, timeout=30)
                     else:

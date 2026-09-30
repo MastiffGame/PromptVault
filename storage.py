@@ -414,7 +414,8 @@ class Store:
                         slots.append(e)
                 out[name] = {"slots": slots, "rules": []}
             elif isinstance(val, dict):
-                out[name] = {"slots": val.get("slots", []), "rules": val.get("rules", [])}
+                out[name] = {"slots": val.get("slots", []), "rules": val.get("rules", []),
+                             "wf_overrides": val.get("wf_overrides") if isinstance(val.get("wf_overrides"), dict) else {}}
         return out
 
     def save_templates(self, templates):

@@ -2,6 +2,20 @@
 
 All notable changes to PromptVault are documented here.
 
+## 2.1.0 — 2026-09-30
+
+### Added
+- **Workflow editor** in the Builder (button "Workflow"): edit the values of the configured ComfyUI API workflow without leaving PromptVault.
+  - *Quick settings* for the common fields PromptVault detects automatically: images per job (`batch_size`), width, height, steps, CFG, sampler, scheduler, denoise, checkpoint.
+  - *All nodes* view listing every node with its editable scalar inputs; links between nodes and placeholder fields are shown read-only.
+  - *Raw JSON* view of the workflow with overrides applied.
+  - **Apply** keeps the changes as session overrides (the file stays untouched); **Save to file** writes them into the workflow file and keeps a `.bak` copy; **Reset overrides** and **Reload**.
+- Overrides are stored in the Builder state and in templates, so one template can render 4 images per job and another just 1 without maintaining two workflow files.
+- Batch ×N shows the resulting image count before sending, e.g. "10 jobs × 5 images = 50 images".
+
+### Changed
+- Values that hold a placeholder (`%PROMPT%`, `%NEGATIVE%`, `%SEED%`) can never be overridden by accident.
+
 ## 2.0.1 — 2026-09-30
 
 ### Added

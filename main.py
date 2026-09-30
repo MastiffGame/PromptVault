@@ -135,6 +135,7 @@ class PromptVaultApp(LibraryMixin, BuilderMixin, DialogsMixin, IntegrationsMixin
         self._trash = self.store.load_trash()
         self._history = self.store.load_history()
         self._slots, self._rules, self._active_template = [], [], None
+        self._wf_overrides = {}
         self._toast_lbl = None
         self._toast_job = None
         self._pending_state = self._restore_builder_state()

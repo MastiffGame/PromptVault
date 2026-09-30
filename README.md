@@ -30,6 +30,8 @@ A desktop app for managing, organizing and combining image-generation prompts
 - Builder state (slots, separator, rules) survives restarts
 - Send the result straight to **Automatic1111** (`/sdapi/v1/txt2img`) or **ComfyUI** (`/prompt` with an API workflow
   using `%PROMPT%`, `%NEGATIVE%` and `%SEED%`); **Batch ×N → Send all** queues every generated result
+- **Workflow editor** for the ComfyUI workflow: change images per job, size, steps, CFG, sampler or any node
+  input as session overrides (saved with templates) or write them back to the file
 
 ### Data & safety
 - Prompt objects with stable IDs (favorites no longer collide on identical text)
