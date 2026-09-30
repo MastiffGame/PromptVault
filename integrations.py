@@ -9,6 +9,7 @@ import datetime as _dt
 import json
 import os
 import queue
+import random
 import sys
 import threading
 
@@ -93,78 +94,128 @@ class IntegrationsMixin:
                 self._post(cb, f"not reachable: {e}"[:140], False)
         threading.Thread(target=work, daemon=True).start()
 
-    def _sd_send(self, prompt, negative=""):
+    def _sd_ready(self, quiet=False):
+        """Prüft Einstellungen; gibt (backend, url, workflow_text) zurück oder None."""
         url = (self.store.get("sd.url") or "").rstrip("/")
         backend = self.store.get("sd.backend", "a1111")
         if not url:
-            self._toast("Set the image backend URL in Settings")
-            return
+            if not quiet:
+                self._toast("Set the image backend URL in Settings")
+            return None
+        wf_text = None
         if backend == "comfy":
             wf_path = self.store.get("sd.workflow", "")
             if not wf_path or not os.path.exists(wf_path):
-                messagebox.showwarning("ComfyUI", "Choose an API-format workflow JSON in Settings.\n"
-                                                  "Use %PROMPT% and %NEGATIVE% as placeholders.", parent=self)
-                return
+                if not quiet:
+                    messagebox.showwarning("ComfyUI", "Choose an API-format workflow JSON in Settings.\n"
+                                                      "Use %PROMPT%, %NEGATIVE% and %SEED% as placeholders.", parent=self)
+                return None
             try:
                 with open(wf_path, "r", encoding="utf-8") as f:
                     wf_text = f.read()
             except OSError as e:
-                self._toast(f"Workflow unreadable: {e}")
-                return
-            wf_text = wf_text.replace("%PROMPT%", json.dumps(prompt)[1:-1]).replace(
-                "%NEGATIVE%", json.dumps(negative)[1:-1])
+                if not quiet:
+                    self._toast(f"Workflow unreadable: {e}")
+                return None
+            if "%PROMPT%" not in wf_text and not quiet:
+                self._toast("Workflow has no %PROMPT% placeholder")
+        return backend, url, wf_text
+
+    @staticmethod
+    def comfy_workflow(wf_text, prompt, negative, seed=None):
+        """Setzt Platzhalter ein und liefert das Workflow-Dict.
+
+        %PROMPT% / %NEGATIVE% werden JSON-sicher als Text eingesetzt, %SEED% als Zahl
+        (funktioniert sowohl als "seed": "%SEED%" als auch als "seed": %SEED%).
+        """
+        if seed is None:
+            seed = random.randint(0, 2 ** 32 - 1)
+        t = wf_text.replace("%PROMPT%", json.dumps(prompt)[1:-1])
+        t = t.replace("%NEGATIVE%", json.dumps(negative or "")[1:-1])
+        t = t.replace('"%SEED%"', str(seed)).replace("%SEED%", str(seed))
+        return json.loads(t)
+
+    def _sd_send(self, prompt, negative=""):
+        self._sd_send_many([(prompt, negative)])
+
+    def _sd_send_many(self, items):
+        """Schickt mehrere (prompt, negative)-Paare nacheinander an das lokale Backend.
+
+        ComfyUI: jeder Auftrag landet in der Warteschlange, die Bilder schreibt ComfyUI selbst.
+        A1111:   Aufträge laufen nacheinander, jedes Bild wird in outputs/ gespeichert.
+        """
+        items = [(p, n or "") for p, n in items if p]
+        if not items:
+            return
+        ready = self._sd_ready()
+        if not ready:
+            return
+        backend, url, wf_text = ready
+        n = len(items)
+        if backend == "comfy":
             try:
-                workflow = json.loads(wf_text)
+                self.comfy_workflow(wf_text, items[0][0], items[0][1])
             except json.JSONDecodeError as e:
                 self._toast(f"Workflow JSON invalid: {e}")
                 return
-            payload = {"prompt": workflow, "client_id": uuid.uuid4().hex}
-            self._toast("Queued in ComfyUI…")
-
-            def work():
-                try:
-                    r = self._http_json("POST", url + "/prompt", payload, timeout=30)
-                    pid = r.get("prompt_id", "?")
-                    self._post(self._toast, f"ComfyUI accepted · {pid[:8]}")
-                except Exception as e:      # noqa: BLE001
-                    self._post(self._toast, f"ComfyUI error: {e}"[:120])
-            threading.Thread(target=work, daemon=True).start()
-            return
-
-        payload = {
-            "prompt": prompt, "negative_prompt": negative,
-            "steps": int(self.store.get("sd.steps", 25)),
-            "width": int(self.store.get("sd.width", 832)),
-            "height": int(self.store.get("sd.height", 1216)),
-        }
-        self._toast("Generating in A1111…")
+        self._toast(f"Queuing {n} in ComfyUI…" if backend == "comfy" else
+                    (f"Generating {n} in A1111…" if n > 1 else "Generating in A1111…"))
 
         def work():
-            try:
-                r = self._http_json("POST", url + "/sdapi/v1/txt2img", payload, timeout=900)
-                imgs = r.get("images") or []
-                saved = None
-                if imgs and self.store.get("sd.save_output", True):
-                    os.makedirs(self.store.output_dir, exist_ok=True)
-                    stamp = _dt.datetime.now().strftime("%Y%m%d_%H%M%S")
-                    saved = os.path.join(self.store.output_dir, f"a1111_{stamp}.png")
-                    with open(saved, "wb") as f:
-                        f.write(base64.b64decode(imgs[0].split(",", 1)[-1]))
-
-                def done():
-                    if saved:
-                        self._toast(f"Image saved: {os.path.basename(saved)}")
-                        try:
-                            os.startfile(saved)
-                        except OSError:
-                            pass
+            ok, errors, saved = 0, [], []
+            for i, (prompt, negative) in enumerate(items, 1):
+                try:
+                    if backend == "comfy":
+                        payload = {"prompt": self.comfy_workflow(wf_text, prompt, negative),
+                                   "client_id": uuid.uuid4().hex}
+                        self._http_json("POST", url + "/prompt", payload, timeout=30)
                     else:
-                        self._toast(f"A1111 returned {len(imgs)} image(s)")
-                self._post(done)
-            except urllib.error.HTTPError as e:
-                self._post(self._toast, f"A1111 HTTP {e.code}")
-            except Exception as e:      # noqa: BLE001
-                self._post(self._toast, f"A1111 error: {e}"[:120])
+                        payload = {
+                            "prompt": prompt, "negative_prompt": negative,
+                            "steps": int(self.store.get("sd.steps", 25)),
+                            "width": int(self.store.get("sd.width", 832)),
+                            "height": int(self.store.get("sd.height", 1216)),
+                        }
+                        r = self._http_json("POST", url + "/sdapi/v1/txt2img", payload, timeout=900)
+                        imgs = r.get("images") or []
+                        if imgs and self.store.get("sd.save_output", True):
+                            os.makedirs(self.store.output_dir, exist_ok=True)
+                            stamp = _dt.datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+                            path = os.path.join(self.store.output_dir, f"a1111_{stamp}.png")
+                            with open(path, "wb") as f:
+                                f.write(base64.b64decode(imgs[0].split(",", 1)[-1]))
+                            saved.append(path)
+                        if n > 1:
+                            self._post(self._toast, f"A1111  {i} / {n} done")
+                    ok += 1
+                except urllib.error.HTTPError as e:
+                    errors.append(f"HTTP {e.code}")
+                except Exception as e:      # noqa: BLE001
+                    errors.append(str(e)[:80])
+                    if backend == "comfy" and "refused" in str(e).lower():
+                        break   # Server weg, nicht weiter hämmern
+
+            def done():
+                name = "ComfyUI" if backend == "comfy" else "A1111"
+                if errors and not ok:
+                    self._toast(f"{name} error: {errors[0]}"[:120])
+                    return
+                if backend == "comfy":
+                    msg = f"{ok} queued in ComfyUI" if n > 1 else "ComfyUI accepted"
+                elif saved:
+                    msg = (f"{len(saved)} images saved to outputs/" if n > 1
+                           else f"Image saved: {os.path.basename(saved[0])}")
+                else:
+                    msg = f"A1111 finished {ok} / {n}"
+                if errors:
+                    msg += f"  ·  {len(errors)} failed"
+                self._toast(msg)
+                if backend != "comfy" and len(saved) == 1 and n == 1:
+                    try:
+                        os.startfile(saved[0])
+                    except OSError:
+                        pass
+            self._post(done)
         threading.Thread(target=work, daemon=True).start()
 
     # ═══════════════════════════════════════════════════════════════

@@ -28,7 +28,8 @@ A desktop app for managing, organizing and combining image-generation prompts
 - Templates: save, overwrite, load, rename, delete (slots + rules)
 - Persistent history with pin / filter / save, template name recorded
 - Builder state (slots, separator, rules) survives restarts
-- Send the result straight to **Automatic1111** (`/sdapi/v1/txt2img`) or **ComfyUI** (`/prompt` with an API workflow)
+- Send the result straight to **Automatic1111** (`/sdapi/v1/txt2img`) or **ComfyUI** (`/prompt` with an API workflow
+  using `%PROMPT%`, `%NEGATIVE%` and `%SEED%`); **Batch ×N → Send all** queues every generated result
 
 ### Data & safety
 - Prompt objects with stable IDs (favorites no longer collide on identical text)

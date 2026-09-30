@@ -2,6 +2,16 @@
 
 All notable changes to PromptVault are documented here.
 
+## 2.0.1 — 2026-09-30
+
+### Added
+- Builder → Batch ×N: new **→ Send all** button queues every generated result on the local image backend. ComfyUI receives one job per result (all land in its queue); Automatic1111 jobs run one after another with progress toasts and each image is saved to `outputs/`. A confirmation appears above 20 jobs.
+- `%SEED%` placeholder for ComfyUI workflows. PromptVault fills it with a fresh random seed for every job, so identical prompts still produce different images. Works as `"seed": "%SEED%"` and as `"seed": %SEED%`.
+
+### Changed
+- Single sends and batch sends share one implementation; the send button is disabled until a backend URL is configured.
+- A warning toast appears if the ComfyUI workflow contains no `%PROMPT%` placeholder.
+
 ## 2.0.0 — 2026-09-29
 
 Platforms: Windows desktop (Python 3.10+ / PyInstaller build), Web (single file, GitHub Pages).

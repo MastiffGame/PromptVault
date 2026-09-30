@@ -695,6 +695,7 @@ class BuilderMixin:
                 res.bind_children_wheel(c)
             for b in (copy_btn, save_btn, exp_btn):
                 b.configure(state="normal" if out else "disabled")
+            send_btn.configure(state="normal" if out and self.store.get("sd.url") else "disabled")
 
         neon_btn(ctrl, "Generate", generate, color=C.PURP, bg=C.PURP_DIM, hover=C.PURP_MID,
                  width=110, height=32, font_size=12).pack(side="right")
@@ -733,9 +734,24 @@ class BuilderMixin:
                 menu.add_command(label=f"Save all to \"{cat}\"", command=lambda c=cat: do(c))
             menu.tk_popup(*self.winfo_pointerxy())
 
+        def send_all():
+            n = len(results["list"])
+            if not n:
+                return
+            if n > 20 and not messagebox.askyesno(
+                    "Send all", f"Queue {n} jobs on the image backend?", parent=self):
+                return
+            self._sd_send_many(results["list"])
+
         copy_btn, save_btn, exp_btn = ov.buttons(("Copy All", copy_all, "neon"),
                                                  ("★ Save all…", save_all, "gold"),
                                                  ("Export .txt", export_txt, "ghost"))
+        send_btn = neon_btn(ov.footer, "→ Send all", send_all, color=C.GREEN, bg=C.SURF3,
+                            hover=C.SURF3, width=110, height=32, font_size=12)
+        send_btn.pack(side="left")
+        Tooltip(send_btn, "Queue every result on the local image backend (Settings)")
+        if not self.store.get("sd.url"):
+            send_btn.configure(state="disabled")
         for b in (copy_btn, save_btn, exp_btn):
             b.configure(state="disabled")
 

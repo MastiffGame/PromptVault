@@ -363,7 +363,7 @@ class DialogsMixin:
                 parent=self, title="ComfyUI API workflow", filetypes=[("JSON", "*.json")]) or wf_var.get()),
                 fg=C.ACC, bg=C.SURF, hover=C.SURF3).pack(side="left", padx=4)
             return f
-        row("ComfyUI workflow", wf_widget, "API-format JSON with %PROMPT% / %NEGATIVE%")
+        row("ComfyUI workflow", wf_widget, "API-format JSON with %PROMPT% / %NEGATIVE% / %SEED% (new seed per job)")
         steps_var = tk.StringVar(value=str(s.get("sd.steps", 25)))
         w_var = tk.StringVar(value=str(s.get("sd.width", 832)))
         h_var = tk.StringVar(value=str(s.get("sd.height", 1216)))
